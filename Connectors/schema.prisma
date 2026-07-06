@@ -1,0 +1,11 @@
+// prisma/schema.prisma  (Prisma 7 starter)
+// In v7 the connection URL is NOT here — it lives in prisma.config.ts.
+// Leave models out; `npx prisma db pull` fills them in from the live DB.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}

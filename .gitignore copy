@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode - user-specific
+xcuserdata/
+*.xcuserstate
+*.xcuserstatee
+*.xcscmblueprint
+
+# Xcode - build products
+build/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+Packages/
+# Note: Package.resolved is intentionally tracked to pin dependency versions.
+
+# CocoaPods / Carthage (if ever added)
+Pods/
+Carthage/Build/
+
+# JetBrains IDEs (AppCode, etc.)
+.idea/
+
+# Injected environment files (keep .env.example, ignore real secrets)
+.env
+*.env
+!*.env.example
+Connectors/.env
