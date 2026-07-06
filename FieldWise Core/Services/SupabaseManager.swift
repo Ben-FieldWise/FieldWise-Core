@@ -1,6 +1,6 @@
 //
 //  SupabaseManager.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Central Supabase client for the app — replaces the Firebase stack.
 //  Add the SDK first: in Xcode → File → Add Package Dependencies →
@@ -21,7 +21,9 @@ enum SupabaseConfig {
 }
 
 /// App-wide singleton. Access the client with `SupabaseManager.shared.client`.
-final class SupabaseManager {
+/// `nonisolated` so the immutable, Sendable client can be reached from any
+/// actor (e.g. `EntrySync`) as well as the main actor.
+nonisolated final class SupabaseManager {
     static let shared = SupabaseManager()
 
     let client: SupabaseClient

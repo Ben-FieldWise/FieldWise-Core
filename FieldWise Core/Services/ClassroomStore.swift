@@ -1,6 +1,6 @@
 //
 //  ClassroomStore.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Observable view-model over SupabaseService for the classroom loop:
 //  teachers create classes + tasks and review submissions; students see

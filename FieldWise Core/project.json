@@ -1,6 +1,6 @@
 {
-  "name": "FieldWise Geography",
-  "bundleId": "com.fieldwiseeducation.fieldwisegeography",
+  "name": "FieldWise Core",
+  "bundleId": "au.com.fieldwiseeducation.fieldwisecore",
   "deploymentTarget": "16.0",
   "xcodeVersion": "15.0+",
   "swiftVersion": "5.9",
@@ -8,5 +8,5 @@
     "com.apple.Maps",
     "com.apple.corelocation"
   ],
-  "note": "Open 'FieldWise Geography.xcodeproj' in Xcode. All source files are in the 'FieldWise Geography/' folder. See README.md for setup steps."
+  "note": "Open 'FieldWise Core.xcodeproj' in Xcode. All source files are in the 'FieldWise Core/' folder. See README.md for setup steps."
 }

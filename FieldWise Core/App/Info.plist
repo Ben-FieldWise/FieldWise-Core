@@ -13,7 +13,7 @@
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundleDisplayName</key>
-	<string>FieldWise Geography</string>
+	<string>FieldWise Core</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleVersion</key>
@@ -52,11 +52,11 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FieldWise Geography uses your location to show your position on the field site map.</string>
+	<string>FieldWise Core uses your location to show your position on the field site map.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>FieldWise Geography uses your camera to photograph rock, soil, and site features during fieldwork.</string>
+	<string>FieldWise Core uses your camera to photograph rock, soil, and site features during fieldwork.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>FieldWise Geography needs access to add photos from your library to your field sheets.</string>
+	<string>FieldWise Core needs access to add photos from your library to your field sheets.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

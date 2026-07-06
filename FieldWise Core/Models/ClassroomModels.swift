@@ -1,6 +1,6 @@
 //
 //  ClassroomModels.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Codable models for the Firebase-backed teacher/student classroom
 //  system: who someone is (UserProfile), what class they're in

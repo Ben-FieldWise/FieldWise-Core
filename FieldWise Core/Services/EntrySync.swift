@@ -1,6 +1,6 @@
 //
 //  EntrySync.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Offline-first sync for FieldworkEntry — the capability Firestore gave
 //  for free, rebuilt deliberately on Supabase.
@@ -37,7 +37,7 @@ actor EntrySync {
         pending = [:]
     }
 
-    /// Call once at launch (see FieldWiseGeographyApp). Starts network
+    /// Call once at launch (see FieldWiseCoreApp). Starts network
     /// monitoring and flushes anything left over from a previous session.
     func start() { Task { await self.begin() } }
 
@@ -67,6 +67,11 @@ actor EntrySync {
     func flush() async {
         for (_, e) in pending { await tryPush(e) }
     }
+
+    /// Snapshot of how many entries are still waiting to reach the
+    /// server. Used by the Core dashboard's sync-status card. Zero means
+    /// everything recorded on this device has synced.
+    func pendingCount() -> Int { pending.count }
 
     /// Locally-queued (not-yet-synced) entries for a student+task, so the
     /// UI can show drafts made offline alongside server rows.

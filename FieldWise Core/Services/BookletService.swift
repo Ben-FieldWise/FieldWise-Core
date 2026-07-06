@@ -1,6 +1,6 @@
 //
 //  BookletService.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Reads structured booklet content and saves a student's per-block
 //  answers. RLS keeps content readable to all signed-in users and

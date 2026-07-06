@@ -1,6 +1,6 @@
 //
 //  BookletModels.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Structured booklet content (a FieldworkTask may point at one) and a
 //  student's per-block answers. Mirrors the Supabase booklet* tables;

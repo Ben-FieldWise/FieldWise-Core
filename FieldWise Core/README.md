@@ -1,4 +1,4 @@
-# FieldWise Geography — Geography Fieldwork Companion
+# FieldWise Core — Geography Fieldwork Companion
 
 A native SwiftUI iOS/iPadOS app for student geography fieldwork. Targets **iOS 16+** and runs in iPad desktop-class / Mac Catalyst-style regular-width layouts as well as standard iPhone.
 
@@ -7,10 +7,10 @@ A native SwiftUI iOS/iPadOS app for student geography fieldwork. Targets **iOS 1
 ## Project Structure
 
 ```
-FieldWise Geography/
-├── FieldWise Geography/
+FieldWise Core/
+├── FieldWise Core/
 │   ├── App/
-│   │   ├── FieldWiseGeographyApp.swift         ← @main entry point
+│   │   ├── FieldWiseCoreApp.swift         ← @main entry point
 │   │   ├── ContentView.swift                  ← Root 5-tab TabView (Plan / Landscapes / Weather / Map / Report)
 │   │   └── Info.plist                         ← Permissions, ATS exceptions, orientations
 │   │
@@ -65,9 +65,9 @@ FieldWise Geography/
 │   │
 │   └── README.md
 │
-├── FieldWise GeographyTests/
-├── FieldWise GeographyUITests/
-└── FieldWise Geography.xcodeproj
+├── FieldWise CoreTests/
+├── FieldWise CoreUITests/
+└── FieldWise Core.xcodeproj
 ```
 
 ---
@@ -91,7 +91,7 @@ The app opens to a 5-tab `TabView` (`ContentView.swift`). On iPhone this renders
 
 ### 1. Open the project
 
-Open `FieldWise Geography.xcodeproj` directly in Xcode — this is an existing Xcode project, not a loose source folder, so there's no need to create a new project or manually drag files in.
+Open `FieldWise Core.xcodeproj` directly in Xcode — this is an existing Xcode project, not a loose source folder, so there's no need to create a new project or manually drag files in.
 
 ### 2. Confirm named colours exist
 

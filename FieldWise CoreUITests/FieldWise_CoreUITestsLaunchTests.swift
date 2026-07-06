@@ -1,13 +1,13 @@
 //
-//  FieldWise_GeographyUITestsLaunchTests.swift
-//  FieldWise GeographyUITests
+//  FieldWise_CoreUITestsLaunchTests.swift
+//  FieldWise CoreUITests
 //
 //  Created by Benjamen Holley on 19/6/2026.
 //
 
 import XCTest
 
-final class FieldWise_GeographyUITestsLaunchTests: XCTestCase {
+final class FieldWise_CoreUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

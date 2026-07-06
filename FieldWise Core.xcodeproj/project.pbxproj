@@ -16,50 +16,50 @@
 			containerPortal = 5FBB030E2FE4F52900178BD2 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 5FBB03152FE4F52900178BD2;
-			remoteInfo = "FieldWise Geography";
+			remoteInfo = "FieldWise Core";
 		};
 		5FBB03302FE4F52D00178BD2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5FBB030E2FE4F52900178BD2 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 5FBB03152FE4F52900178BD2;
-			remoteInfo = "FieldWise Geography";
+			remoteInfo = "FieldWise Core";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5FBB03162FE4F52900178BD2 /* FieldWise Geography.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FieldWise Geography.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5FBB03252FE4F52D00178BD2 /* FieldWise GeographyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FieldWise GeographyTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5FBB032F2FE4F52D00178BD2 /* FieldWise GeographyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FieldWise GeographyUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5FBB03162FE4F52900178BD2 /* FieldWise Core.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FieldWise Core.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5FBB03252FE4F52D00178BD2 /* FieldWise CoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FieldWise CoreTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5FBB032F2FE4F52D00178BD2 /* FieldWise CoreUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FieldWise CoreUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		5FF61A722FEBB13100169E77 /* Exceptions for "FieldWise Geography" folder in "FieldWise Geography" target */ = {
+		5FF61A722FEBB13100169E77 /* Exceptions for "FieldWise Core" folder in "FieldWise Core" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				App/Info.plist,
 			);
-			target = 5FBB03152FE4F52900178BD2 /* FieldWise Geography */;
+			target = 5FBB03152FE4F52900178BD2 /* FieldWise Core */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5FBB03182FE4F52900178BD2 /* FieldWise Geography */ = {
+		5FBB03182FE4F52900178BD2 /* FieldWise Core */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				5FF61A722FEBB13100169E77 /* Exceptions for "FieldWise Geography" folder in "FieldWise Geography" target */,
+				5FF61A722FEBB13100169E77 /* Exceptions for "FieldWise Core" folder in "FieldWise Core" target */,
 			);
-			path = "FieldWise Geography";
+			path = "FieldWise Core";
 			sourceTree = "<group>";
 		};
-		5FBB03282FE4F52D00178BD2 /* FieldWise GeographyTests */ = {
+		5FBB03282FE4F52D00178BD2 /* FieldWise CoreTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "FieldWise GeographyTests";
+			path = "FieldWise CoreTests";
 			sourceTree = "<group>";
 		};
-		5FBB03322FE4F52D00178BD2 /* FieldWise GeographyUITests */ = {
+		5FBB03322FE4F52D00178BD2 /* FieldWise CoreUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "FieldWise GeographyUITests";
+			path = "FieldWise CoreUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -100,9 +100,9 @@
 		5FBB030D2FE4F52900178BD2 = {
 			isa = PBXGroup;
 			children = (
-				5FBB03182FE4F52900178BD2 /* FieldWise Geography */,
-				5FBB03282FE4F52D00178BD2 /* FieldWise GeographyTests */,
-				5FBB03322FE4F52D00178BD2 /* FieldWise GeographyUITests */,
+				5FBB03182FE4F52900178BD2 /* FieldWise Core */,
+				5FBB03282FE4F52D00178BD2 /* FieldWise CoreTests */,
+				5FBB03322FE4F52D00178BD2 /* FieldWise CoreUITests */,
 				5F2C59542FF26A22006A743A /* Frameworks */,
 				5FBB03172FE4F52900178BD2 /* Products */,
 			);
@@ -111,9 +111,9 @@
 		5FBB03172FE4F52900178BD2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5FBB03162FE4F52900178BD2 /* FieldWise Geography.app */,
-				5FBB03252FE4F52D00178BD2 /* FieldWise GeographyTests.xctest */,
-				5FBB032F2FE4F52D00178BD2 /* FieldWise GeographyUITests.xctest */,
+				5FBB03162FE4F52900178BD2 /* FieldWise Core.app */,
+				5FBB03252FE4F52D00178BD2 /* FieldWise CoreTests.xctest */,
+				5FBB032F2FE4F52D00178BD2 /* FieldWise CoreUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,9 +121,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		5FBB03152FE4F52900178BD2 /* FieldWise Geography */ = {
+		5FBB03152FE4F52900178BD2 /* FieldWise Core */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5FBB03392FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise Geography" */;
+			buildConfigurationList = 5FBB03392FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise Core" */;
 			buildPhases = (
 				5FBB03122FE4F52900178BD2 /* Sources */,
 				5FBB03132FE4F52900178BD2 /* Frameworks */,
@@ -134,19 +134,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				5FBB03182FE4F52900178BD2 /* FieldWise Geography */,
+				5FBB03182FE4F52900178BD2 /* FieldWise Core */,
 			);
-			name = "FieldWise Geography";
+			name = "FieldWise Core";
 			packageProductDependencies = (
 				5F71D9742FF7BFB900B921B3 /* Supabase */,
 			);
-			productName = "FieldWise Geography";
-			productReference = 5FBB03162FE4F52900178BD2 /* FieldWise Geography.app */;
+			productName = "FieldWise Core";
+			productReference = 5FBB03162FE4F52900178BD2 /* FieldWise Core.app */;
 			productType = "com.apple.product-type.application";
 		};
-		5FBB03242FE4F52D00178BD2 /* FieldWise GeographyTests */ = {
+		5FBB03242FE4F52D00178BD2 /* FieldWise CoreTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5FBB033C2FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise GeographyTests" */;
+			buildConfigurationList = 5FBB033C2FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise CoreTests" */;
 			buildPhases = (
 				5FBB03212FE4F52D00178BD2 /* Sources */,
 				5FBB03222FE4F52D00178BD2 /* Frameworks */,
@@ -158,18 +158,18 @@
 				5FBB03272FE4F52D00178BD2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				5FBB03282FE4F52D00178BD2 /* FieldWise GeographyTests */,
+				5FBB03282FE4F52D00178BD2 /* FieldWise CoreTests */,
 			);
-			name = "FieldWise GeographyTests";
+			name = "FieldWise CoreTests";
 			packageProductDependencies = (
 			);
-			productName = "FieldWise GeographyTests";
-			productReference = 5FBB03252FE4F52D00178BD2 /* FieldWise GeographyTests.xctest */;
+			productName = "FieldWise CoreTests";
+			productReference = 5FBB03252FE4F52D00178BD2 /* FieldWise CoreTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		5FBB032E2FE4F52D00178BD2 /* FieldWise GeographyUITests */ = {
+		5FBB032E2FE4F52D00178BD2 /* FieldWise CoreUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5FBB033F2FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise GeographyUITests" */;
+			buildConfigurationList = 5FBB033F2FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise CoreUITests" */;
 			buildPhases = (
 				5FBB032B2FE4F52D00178BD2 /* Sources */,
 				5FBB032C2FE4F52D00178BD2 /* Frameworks */,
@@ -181,13 +181,13 @@
 				5FBB03312FE4F52D00178BD2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				5FBB03322FE4F52D00178BD2 /* FieldWise GeographyUITests */,
+				5FBB03322FE4F52D00178BD2 /* FieldWise CoreUITests */,
 			);
-			name = "FieldWise GeographyUITests";
+			name = "FieldWise CoreUITests";
 			packageProductDependencies = (
 			);
-			productName = "FieldWise GeographyUITests";
-			productReference = 5FBB032F2FE4F52D00178BD2 /* FieldWise GeographyUITests.xctest */;
+			productName = "FieldWise CoreUITests";
+			productReference = 5FBB032F2FE4F52D00178BD2 /* FieldWise CoreUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -213,7 +213,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5FBB03112FE4F52900178BD2 /* Build configuration list for PBXProject "FieldWise Geography" */;
+			buildConfigurationList = 5FBB03112FE4F52900178BD2 /* Build configuration list for PBXProject "FieldWise Core" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -230,9 +230,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				5FBB03152FE4F52900178BD2 /* FieldWise Geography */,
-				5FBB03242FE4F52D00178BD2 /* FieldWise GeographyTests */,
-				5FBB032E2FE4F52D00178BD2 /* FieldWise GeographyUITests */,
+				5FBB03152FE4F52900178BD2 /* FieldWise Core */,
+				5FBB03242FE4F52D00178BD2 /* FieldWise CoreTests */,
+				5FBB032E2FE4F52D00178BD2 /* FieldWise CoreUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -288,12 +288,12 @@
 /* Begin PBXTargetDependency section */
 		5FBB03272FE4F52D00178BD2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 5FBB03152FE4F52900178BD2 /* FieldWise Geography */;
+			target = 5FBB03152FE4F52900178BD2 /* FieldWise Core */;
 			targetProxy = 5FBB03262FE4F52D00178BD2 /* PBXContainerItemProxy */;
 		};
 		5FBB03312FE4F52D00178BD2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 5FBB03152FE4F52900178BD2 /* FieldWise Geography */;
+			target = 5FBB03152FE4F52900178BD2 /* FieldWise Core */;
 			targetProxy = 5FBB03302FE4F52D00178BD2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -430,8 +430,8 @@
 				DEVELOPMENT_TEAM = XDUT93WTB4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "FieldWise Geography/App/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "FieldWise Geography";
+				INFOPLIST_FILE = "FieldWise Core/App/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "FieldWise Core";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -443,7 +443,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.fieldwiseeducation.fieldwisegeography;
+				PRODUCT_BUNDLE_IDENTIFIER = au.com.fieldwiseeducation.fieldwisecore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -465,8 +465,8 @@
 				DEVELOPMENT_TEAM = XDUT93WTB4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "FieldWise Geography/App/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "FieldWise Geography";
+				INFOPLIST_FILE = "FieldWise Core/App/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "FieldWise Core";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -478,7 +478,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.fieldwiseeducation.fieldwisegeography;
+				PRODUCT_BUNDLE_IDENTIFIER = au.com.fieldwiseeducation.fieldwisecore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -500,7 +500,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.fieldwiseeducation.fieldwisegeography.Tests;
+				PRODUCT_BUNDLE_IDENTIFIER = au.com.fieldwiseeducation.fieldwisecore.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -508,7 +508,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FieldWise Geography.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FieldWise Geography";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FieldWise Core.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FieldWise Core";
 			};
 			name = Debug;
 		};
@@ -522,7 +522,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.fieldwiseeducation.fieldwisegeography.Tests;
+				PRODUCT_BUNDLE_IDENTIFIER = au.com.fieldwiseeducation.fieldwisecore.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -530,7 +530,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FieldWise Geography.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FieldWise Geography";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FieldWise Core.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FieldWise Core";
 			};
 			name = Release;
 		};
@@ -541,7 +541,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.fieldwiseeducation.fieldwisegeography.UITests;
+				PRODUCT_BUNDLE_IDENTIFIER = au.com.fieldwiseeducation.fieldwisecore.UITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -549,7 +549,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "FieldWise Geography";
+				TEST_TARGET_NAME = "FieldWise Core";
 			};
 			name = Debug;
 		};
@@ -560,7 +560,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.fieldwiseeducation.fieldwisegeography.UITests;
+				PRODUCT_BUNDLE_IDENTIFIER = au.com.fieldwiseeducation.fieldwisecore.UITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -568,14 +568,14 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "FieldWise Geography";
+				TEST_TARGET_NAME = "FieldWise Core";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5FBB03112FE4F52900178BD2 /* Build configuration list for PBXProject "FieldWise Geography" */ = {
+		5FBB03112FE4F52900178BD2 /* Build configuration list for PBXProject "FieldWise Core" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5FBB03372FE4F52D00178BD2 /* Debug */,
@@ -584,7 +584,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5FBB03392FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise Geography" */ = {
+		5FBB03392FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise Core" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5FBB033A2FE4F52D00178BD2 /* Debug */,
@@ -593,7 +593,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5FBB033C2FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise GeographyTests" */ = {
+		5FBB033C2FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise CoreTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5FBB033D2FE4F52D00178BD2 /* Debug */,
@@ -602,7 +602,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5FBB033F2FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise GeographyUITests" */ = {
+		5FBB033F2FE4F52D00178BD2 /* Build configuration list for PBXNativeTarget "FieldWise CoreUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5FBB03402FE4F52D00178BD2 /* Debug */,

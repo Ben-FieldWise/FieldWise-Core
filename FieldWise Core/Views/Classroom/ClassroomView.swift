@@ -1,6 +1,6 @@
 //
 //  ClassroomView.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  The teacher ↔ student classroom loop, branched by role:
 //    • Teacher: create classes (with join codes), add fieldwork tasks,

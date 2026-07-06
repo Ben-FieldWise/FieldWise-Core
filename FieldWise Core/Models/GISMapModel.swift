@@ -230,7 +230,7 @@ final class TopographicTileOverlay: MKTileOverlay {
         var request = URLRequest(url: url(forTilePath: path))
         // Identifies this app to the tile server, as required by the
         // OSMF tile usage policy (no generic SDK default User-Agent).
-        request.setValue("FieldWiseGeography-iOS-StudentFieldworkApp/1.0", forHTTPHeaderField: "User-Agent")
+        request.setValue("FieldWiseCore-iOS-StudentFieldworkApp/1.0", forHTTPHeaderField: "User-Agent")
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             result(data, error)
         }

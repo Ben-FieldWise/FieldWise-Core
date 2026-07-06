@@ -1,6 +1,6 @@
 //
 //  BookletFillView.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Renders a structured booklet (a FieldworkTask with a bookletId) as a
 //  scrollable set of typed question blocks a student fills in. Each block
@@ -11,6 +11,7 @@
 //
 
 import SwiftUI
+import Combine
 
 // MARK: - Store
 

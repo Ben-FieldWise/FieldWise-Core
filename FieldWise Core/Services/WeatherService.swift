@@ -64,7 +64,7 @@ class GeocodingService {
         }
 
         var request = URLRequest(url: url)
-        request.setValue("FieldWise Geography iOS App", forHTTPHeaderField: "User-Agent")
+        request.setValue("FieldWise Core iOS App", forHTTPHeaderField: "User-Agent")
 
         let (data, _) = try await URLSession.shared.data(for: request)
 

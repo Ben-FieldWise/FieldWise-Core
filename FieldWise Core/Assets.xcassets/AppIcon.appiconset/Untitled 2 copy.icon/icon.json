@@ -19,8 +19,8 @@
     {
       "layers" : [
         {
-          "image-name" : "fieldwise-geography-appicon-1024.svg",
-          "name" : "fieldwise-geography-appicon-1024",
+          "image-name" : "fieldwise-core-appicon-1024.svg",
+          "name" : "fieldwise-core-appicon-1024",
           "position" : {
             "scale" : 2,
             "translation-in-points" : [

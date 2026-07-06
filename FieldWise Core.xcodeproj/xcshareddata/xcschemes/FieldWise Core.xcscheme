@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "5FBB03152FE4F52900178BD2"
-               BuildableName = "FieldWise Geography.app"
-               BlueprintName = "FieldWise Geography"
-               ReferencedContainer = "container:FieldWise Geography.xcodeproj">
+               BuildableName = "FieldWise Core.app"
+               BlueprintName = "FieldWise Core"
+               ReferencedContainer = "container:FieldWise Core.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -36,9 +36,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "5FBB03242FE4F52D00178BD2"
-               BuildableName = "FieldWise GeographyTests.xctest"
-               BlueprintName = "FieldWise GeographyTests"
-               ReferencedContainer = "container:FieldWise Geography.xcodeproj">
+               BuildableName = "FieldWise CoreTests.xctest"
+               BlueprintName = "FieldWise CoreTests"
+               ReferencedContainer = "container:FieldWise Core.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -47,9 +47,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "5FBB032E2FE4F52D00178BD2"
-               BuildableName = "FieldWise GeographyUITests.xctest"
-               BlueprintName = "FieldWise GeographyUITests"
-               ReferencedContainer = "container:FieldWise Geography.xcodeproj">
+               BuildableName = "FieldWise CoreUITests.xctest"
+               BlueprintName = "FieldWise CoreUITests"
+               ReferencedContainer = "container:FieldWise Core.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -70,9 +70,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5FBB03152FE4F52900178BD2"
-            BuildableName = "FieldWise Geography.app"
-            BlueprintName = "FieldWise Geography"
-            ReferencedContainer = "container:FieldWise Geography.xcodeproj">
+            BuildableName = "FieldWise Core.app"
+            BlueprintName = "FieldWise Core"
+            ReferencedContainer = "container:FieldWise Core.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -87,9 +87,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5FBB03152FE4F52900178BD2"
-            BuildableName = "FieldWise Geography.app"
-            BlueprintName = "FieldWise Geography"
-            ReferencedContainer = "container:FieldWise Geography.xcodeproj">
+            BuildableName = "FieldWise Core.app"
+            BlueprintName = "FieldWise Core"
+            ReferencedContainer = "container:FieldWise Core.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

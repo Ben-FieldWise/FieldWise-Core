@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Root view — switches between:
 //    • AuthRootView  — when nobody is signed in (role picker → teacher
@@ -60,31 +60,27 @@ struct ContentView: View {
 
     private var mainTabView: some View {
         TabView(selection: $navCoordinator.selectedTab) {
+            CoreHomeView()
+                .tabItem { Label("Home", systemImage: "house.fill") }
+                .tag(AppTab.home)
+
+            ClassroomView()
+                .tabItem { Label("Classes", systemImage: "person.2.fill") }
+                .tag(AppTab.classes)
+
             PlanRootView()
-                .tabItem { Label("Plan", systemImage: "clipboard.fill") }
-                .tag(AppTab.plan)
-
-            GeologyRootView()
-                .tabItem { Label("Landscapes", systemImage: "mountain.2.fill") }
-                .tag(AppTab.geology)
-
-            WeatherRootView()
-                .tabItem { Label("Weather", systemImage: "cloud.sun.fill") }
-                .tag(AppTab.weather)
+                .tabItem { Label("Excursions", systemImage: "map.circle.fill") }
+                .tag(AppTab.excursions)
 
             MapSectionView()
                 .tabItem { Label("Map", systemImage: "map.fill") }
                 .tag(AppTab.map)
 
             FieldChecklistView()
-                .tabItem { Label("Report", systemImage: "doc.plaintext.fill") }
-                .tag(AppTab.report)
-
-            ClassroomView()
-                .tabItem { Label("Class", systemImage: "person.2.fill") }
-                .tag(AppTab.classroom)
+                .tabItem { Label("Reports", systemImage: "doc.plaintext.fill") }
+                .tag(AppTab.reports)
         }
-        .tint(Color("GeoGreen"))
+        .tint(Color("BrandGreen"))
     }
 }
 
@@ -417,14 +413,21 @@ struct BrandTextField: View {
 
 // MARK: - Tab identity + shared navigation coordinator
 
+/// The Core platform areas from Section 1 of the FieldWise plan:
+/// Home (role-aware dashboard), Classes (management + review),
+/// Excursions (planning + safety), Map (sites & locations), and
+/// Reports (evidence exports / portfolios). Subject-specific tools
+/// (landforms, weather, soils, coasts) deliberately live in the subject
+/// apps, not here — that's the Core boundary.
 enum AppTab: Hashable {
-    case plan, geology, weather, map, report, classroom
+    case home, classes, excursions, map, reports
 }
 
 /// Lets any tab request a switch to another tab — used by "View on Map"
-/// in the Report tab to jump to the Map tab programmatically.
+/// in the Reports tab to jump to the Map tab programmatically, and by the
+/// Home dashboard's quick actions.
 final class AppNavigationCoordinator: ObservableObject {
-    @Published var selectedTab: AppTab = .plan
+    @Published var selectedTab: AppTab = .home
 
     func goToMap() {
         selectedTab = .map

@@ -1,6 +1,6 @@
 //
 //  AuthService.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Supabase-backed auth (migrated off Firebase). Two sign-in paths:
 //    • students authenticate anonymously (device = identity) then join a
@@ -77,14 +77,23 @@ final class AuthService: ObservableObject {
 
     deinit { authListener?.cancel() }
 
-    private func refreshProfile(uid: String) async {
+    @discardableResult
+    private func refreshProfile(uid: String) async -> Bool {
         do {
             let profile: UserProfile = try await client
                 .from("users").select().eq("id", value: uid).single().execute().value
             currentUserProfile = profile.with(id: uid)
+            return true
         } catch {
-            // Missing profile mid-join is normal — not surfaced.
+            // No profile row yet is normal mid-join (a student who has
+            // authenticated but not been inserted). For a teacher sign-in
+            // it means the lookup was blocked (RLS) or the row is missing
+            // — the caller decides whether to surface that.
             currentUserProfile = nil
+            #if DEBUG
+            print("[AuthService] refreshProfile(\(uid)) failed: \(error)")
+            #endif
+            return false
         }
     }
 
@@ -114,7 +123,10 @@ final class AuthService: ObservableObject {
         defer { isLoading = false }
         do {
             let session = try await client.auth.signIn(email: email, password: password)
-            await refreshProfile(uid: session.user.id.uuidString.lowercased())
+            let loaded = await refreshProfile(uid: session.user.id.uuidString.lowercased())
+            if !loaded {
+                lastError = "Signed in, but your profile couldn’t be loaded. If you just created this account, confirm your email first — otherwise check the users table and its select policy in Supabase."
+            }
         } catch {
             lastError = error.localizedDescription
         }

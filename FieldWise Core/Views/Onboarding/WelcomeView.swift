@@ -1,6 +1,6 @@
 //
 //  WelcomeView.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  First-launch onboarding sheet with real FieldWise Education branding.
 //  Shown automatically exactly once (gated by AppStorage in ContentView)
@@ -62,7 +62,7 @@ struct WelcomeView: View {
 
                     // ── Hero: real FieldWise logo ──────────────────────────
                     VStack(spacing: 16) {
-                        // Stacked logo SVG (icon mark + FieldWise + GEOGRAPHY)
+                        // Stacked logo SVG (icon mark + FieldWise + CORE)
                         Image("FieldWiseLogo")
                             .resizable()
                             .scaledToFit()

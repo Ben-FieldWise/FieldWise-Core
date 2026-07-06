@@ -1,6 +1,6 @@
 //
 //  SupabaseService.swift
-//  FieldWise Geography
+//  FieldWise Core
 //
 //  Data layer over Supabase (PostgREST) — replaces FirestoreService.
 //  Mirrors the old method surface (schools / classes / tasks / entries)
