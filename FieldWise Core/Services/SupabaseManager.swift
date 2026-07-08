@@ -34,4 +34,19 @@ nonisolated final class SupabaseManager {
             supabaseKey: SupabaseConfig.publishableKey
         )
     }
+
+    /// Completes an auth redirect that deep-links back into the app via the
+    /// `fieldwisecore://` URL scheme — e.g. tapping the confirmation link in a
+    /// sign-up email. Exchanges the code in the URL for a session and stores
+    /// it; supabase-swift then emits an auth-state change that AuthService
+    /// observes to load the profile and show the signed-in tabs.
+    func handleOpenURL(_ url: URL) async {
+        do {
+            _ = try await client.auth.session(from: url)
+        } catch {
+            #if DEBUG
+            print("[SupabaseManager] deep-link auth failed for \(url): \(error)")
+            #endif
+        }
+    }
 }
