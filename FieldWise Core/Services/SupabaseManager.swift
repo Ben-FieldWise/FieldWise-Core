@@ -14,7 +14,7 @@
 import Foundation
 import Supabase
 
-enum SupabaseConfig {
+nonisolated enum SupabaseConfig {
     static let url = URL(string: "https://yhhvkvacykksopurzpmj.supabase.co")!
     // Publishable (client-safe) key. NOT the service_role key — never ship that.
     static let publishableKey = "sb_publishable_eI8UPkGYeoO2-gobQI8lvQ_q7YN6_Zs"
