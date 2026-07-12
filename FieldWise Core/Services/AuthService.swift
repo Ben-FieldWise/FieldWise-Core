@@ -79,6 +79,7 @@ final class AuthService: ObservableObject {
 
     @discardableResult
     private func refreshProfile(uid: String) async -> Bool {
+        print("refreshProfile querying uid: \(uid)")
         do {
             let profile: UserProfile = try await client
                 .from("users").select().eq("id", value: uid).single().execute().value

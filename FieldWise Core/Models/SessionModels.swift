@@ -150,11 +150,16 @@ struct JoinSessionResult: Decodable {
     var responseId: String
     var responseStatus: String
 
+    // PostgREST names RPC result columns after the SQL function's
+    // RETURNS TABLE output parameter names. join_session_by_code's OUT
+    // parameters are prefixed "out_" (see phase1c_fix_ambiguous_column.sql)
+    // to avoid an ON CONFLICT column-name collision inside the function
+    // body — these keys must match that, not the plain "session_id" etc.
     enum CodingKeys: String, CodingKey {
-        case sessionId = "session_id"
-        case sheetId = "sheet_id"
-        case sessionStatus = "session_status"
-        case responseId = "response_id"
-        case responseStatus = "response_status"
+        case sessionId = "out_session_id"
+        case sheetId = "out_sheet_id"
+        case sessionStatus = "out_session_status"
+        case responseId = "out_response_id"
+        case responseStatus = "out_response_status"
     }
 }

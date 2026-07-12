@@ -114,14 +114,19 @@ final class SessionService {
     /// need broad SELECT on fieldwork_sessions.
     func joinSession(code: String) async throws -> JoinSessionResult {
         let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        print("joinSession: calling RPC with code=\(trimmed)")
         let rows: [JoinSessionResult] = try await client
             .rpc("join_session_by_code", params: CodeParam(code: trimmed)).execute().value
+        print("joinSession: RPC returned \(rows.count) row(s)")
         guard let result = rows.first else { throw AuthError.classCodeNotFound }
+        print("joinSession: result sessionId=\(result.sessionId) responseId=\(result.responseId)")
         return result
     }
 
     func fetchMyResponse(id: String) async throws -> StudentResponse {
-        try await client
+        let session = try? await client.auth.session
+        print("fetchMyResponse: client session uid = \(session?.user.id.uuidString ?? "NIL"), fetching id = \(id)")
+        return try await client
             .from("student_responses").select().eq("id", value: id).single().execute().value
     }
 

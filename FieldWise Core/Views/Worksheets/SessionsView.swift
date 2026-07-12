@@ -6,6 +6,13 @@
 //  row. Each session gets its own join code, independent of class
 //  membership. Pushed from SheetEditorView via a toolbar action.
 //
+//  Navigation into a specific session's responses uses
+//  .navigationDestination(item:) driven by a plain Optional @State, with
+//  row taps going through a Button rather than NavigationLink(value:) —
+//  the type-based .navigationDestination(for:) pattern was the source of
+//  a hard-to-diagnose bug on WorksheetListView (destination construction
+//  would silently fail to visually activate); this avoids it here too.
+//
 
 import SwiftUI
 
@@ -16,6 +23,7 @@ struct SessionsView: View {
 
     @State private var showingNewConfirm = false
     @State private var newlyCreated: FieldworkSession?
+    @State private var selectedSession: FieldworkSession?
 
     var body: some View {
         Group {
@@ -30,7 +38,7 @@ struct SessionsView: View {
         .background(Color("GeoSurface"))
         .navigationTitle("Sessions")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(for: FieldworkSession.self) { session in
+        .navigationDestination(item: $selectedSession) { session in
             SessionResponsesView(session: session)
         }
         .toolbar {
@@ -53,9 +61,18 @@ struct SessionsView: View {
     private var list: some View {
         List {
             ForEach(store.sessions) { session in
-                NavigationLink(value: session) {
-                    SessionRow(session: session)
+                Button {
+                    selectedSession = session
+                } label: {
+                    HStack {
+                        SessionRow(session: session)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.secondary.opacity(0.5))
+                    }
                 }
+                .buttonStyle(.plain)
                 .swipeActions {
                     if session.isActive {
                         Button("Close") { Task { await store.closeSession(session) } }
