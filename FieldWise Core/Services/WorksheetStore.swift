@@ -70,8 +70,10 @@ final class WorksheetStore: ObservableObject {
     // MARK: - Sheet detail (sections + questions)
 
     func loadDetail(sheetId: String) async {
+        print("loadDetail called for sheetId: \(sheetId)")
         await run {
             self.sections = try await self.service.fetchSections(sheetId: sheetId)
+            print("fetched \(self.sections.count) sections")
             var map: [String: [WorksheetQuestion]] = [:]
             for section in self.sections {
                 map[section.id] = try await self.service.fetchQuestions(sectionId: section.id)

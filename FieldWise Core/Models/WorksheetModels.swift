@@ -111,6 +111,23 @@ struct FieldworkSheet: Codable, Identifiable, Hashable {
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
+
+    // Custom Hashable/Equatable: identity for navigation purposes (and any
+    // other place this type is used as a NavigationLink/dictionary/Set
+    // value) should be `id` alone, matching Identifiable. The default
+    // synthesized Hashable hashes every stored property, so if `updatedAt`
+    // (or any other field) changes on a row between when a NavigationLink
+    // is created and when SwiftUI resolves the tap against its
+    // .navigationDestination(for:), the hash no longer matches and the
+    // link silently fails to activate ("no matching navigationDestination
+    // declaration" / "declared earlier on the stack").
+    static func == (lhs: FieldworkSheet, rhs: FieldworkSheet) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 // MARK: - Section

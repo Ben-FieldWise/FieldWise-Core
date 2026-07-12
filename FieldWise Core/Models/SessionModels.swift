@@ -36,6 +36,19 @@ struct FieldworkSession: Codable, Identifiable, Hashable {
     }
 
     var isActive: Bool { status == "active" }
+
+    // Identity-based Hashable/Equatable (id only) — see FieldworkSheet in
+    // WorksheetModels.swift for the full rationale. This type is used
+    // with NavigationLink(value:) in SessionsView, and `status`/`updatedAt`
+    // mutate via closeSession/reopenSession, so default field-wise hashing
+    // would hit the same "no matching navigationDestination" bug.
+    static func == (lhs: FieldworkSession, rhs: FieldworkSession) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 // MARK: - Student response

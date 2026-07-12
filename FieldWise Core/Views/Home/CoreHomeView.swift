@@ -56,7 +56,7 @@ struct CoreHomeView: View {
                         )
                     }
                     .padding(20)
-                    .task { await load(for: profile) }
+                    .task(id: profile.id) { await load(for: profile) }
                 } else {
                     ProgressView().padding(.top, 80)
                 }

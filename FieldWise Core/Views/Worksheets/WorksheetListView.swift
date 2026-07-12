@@ -7,6 +7,13 @@
 //  (Home tab's "Worksheets" quick action), so it does NOT wrap its own
 //  NavigationStack — it relies on the one already on Home.
 //
+//  Navigation into a specific sheet uses .navigationDestination(item:)
+//  driven by a plain Optional @State, with row taps going through a
+//  Button (not NavigationLink(value:)) so there's no reliance on
+//  .navigationDestination(for:) type-based lookup — that pattern was the
+//  source of an earlier, hard-to-diagnose bug where the destination
+//  intermittently failed to activate.
+//
 
 import SwiftUI
 
@@ -14,6 +21,8 @@ struct WorksheetListView: View {
     @EnvironmentObject private var authService: AuthService
     @StateObject private var store = WorksheetStore()
     @State private var showingNew = false
+    @State private var selectedSheet: FieldworkSheet?
+    @State private var hasSettled = false
 
     var body: some View {
         Group {
@@ -28,7 +37,7 @@ struct WorksheetListView: View {
         .background(Color("GeoSurface"))
         .navigationTitle("My Worksheets")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(for: FieldworkSheet.self) { sheet in
+        .navigationDestination(item: $selectedSheet) { sheet in
             SheetEditorView(sheet: sheet)
         }
         .toolbar {
@@ -52,8 +61,18 @@ struct WorksheetListView: View {
                 }
             }
         }
-        .task {
-            if let uid = authService.uid { await store.loadMySheets(teacherId: uid) }
+        .task(id: authService.uid) {
+            guard let uid = authService.uid, store.sheets.isEmpty else { return }
+            await store.loadMySheets(teacherId: uid)
+            // Give the auth/session layer a moment to settle before rows
+            // become tappable. Tapping immediately after this view appears
+            // could otherwise race a still-in-flight auth state republish
+            // (e.g. Supabase's documented duplicate initial-session event)
+            // that forces a parent re-render mid-navigation. A short,
+            // one-time delay is a pragmatic guard, not a real fix for
+            // that underlying race, but it reliably avoids hitting it.
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            hasSettled = true
         }
         .alert("Something went wrong", isPresented: .constant(store.errorText != nil), actions: {
             Button("OK") { store.errorText = nil }
@@ -65,9 +84,23 @@ struct WorksheetListView: View {
     private var list: some View {
         List {
             ForEach(store.sheets) { sheet in
-                NavigationLink(value: sheet) {
-                    SheetRow(sheet: sheet)
+                Button {
+                    guard hasSettled else { return }
+                    selectedSheet = sheet
+                } label: {
+                    HStack {
+                        SheetRow(sheet: sheet)
+                        Spacer()
+                        if hasSettled {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.secondary.opacity(0.5))
+                        } else {
+                            ProgressView().controlSize(.small)
+                        }
+                    }
                 }
+                .buttonStyle(.plain)
             }
             .onDelete { indexSet in
                 for index in indexSet {

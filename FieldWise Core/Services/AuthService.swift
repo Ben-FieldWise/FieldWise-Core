@@ -82,14 +82,30 @@ final class AuthService: ObservableObject {
         do {
             let profile: UserProfile = try await client
                 .from("users").select().eq("id", value: uid).single().execute().value
-            currentUserProfile = profile.with(id: uid)
+            let updated = profile.with(id: uid)
+            // Guard against redundant republishing: @Published fires on
+            // every assignment regardless of equality, and Supabase's SDK
+            // is documented to sometimes emit a second, duplicate
+            // authStateChanges event shortly after launch (see
+            // "Initial session emitted after attempting to refresh the
+            // local stored session" in the console). If that second event
+            // lands mid-navigation, an unconditional reassignment here
+            // forces every view observing currentUserProfile to
+            // re-evaluate its body — including CoreHomeView, which can
+            // collide with an in-flight NavigationStack push happening at
+            // that exact moment. Only publish when something really changed.
+            if currentUserProfile != updated {
+                currentUserProfile = updated
+            }
             return true
         } catch {
             // No profile row yet is normal mid-join (a student who has
             // authenticated but not been inserted). For a teacher sign-in
             // it means the lookup was blocked (RLS) or the row is missing
             // — the caller decides whether to surface that.
-            currentUserProfile = nil
+            if currentUserProfile != nil {
+                currentUserProfile = nil
+            }
             #if DEBUG
             print("[AuthService] refreshProfile(\(uid)) failed: \(error)")
             #endif
