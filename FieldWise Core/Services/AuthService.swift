@@ -79,34 +79,17 @@ final class AuthService: ObservableObject {
 
     @discardableResult
     private func refreshProfile(uid: String) async -> Bool {
-        print("refreshProfile querying uid: \(uid)")
         do {
             let profile: UserProfile = try await client
                 .from("users").select().eq("id", value: uid).single().execute().value
-            let updated = profile.with(id: uid)
-            // Guard against redundant republishing: @Published fires on
-            // every assignment regardless of equality, and Supabase's SDK
-            // is documented to sometimes emit a second, duplicate
-            // authStateChanges event shortly after launch (see
-            // "Initial session emitted after attempting to refresh the
-            // local stored session" in the console). If that second event
-            // lands mid-navigation, an unconditional reassignment here
-            // forces every view observing currentUserProfile to
-            // re-evaluate its body — including CoreHomeView, which can
-            // collide with an in-flight NavigationStack push happening at
-            // that exact moment. Only publish when something really changed.
-            if currentUserProfile != updated {
-                currentUserProfile = updated
-            }
+            currentUserProfile = profile.with(id: uid)
             return true
         } catch {
             // No profile row yet is normal mid-join (a student who has
             // authenticated but not been inserted). For a teacher sign-in
             // it means the lookup was blocked (RLS) or the row is missing
             // — the caller decides whether to surface that.
-            if currentUserProfile != nil {
-                currentUserProfile = nil
-            }
+            currentUserProfile = nil
             #if DEBUG
             print("[AuthService] refreshProfile(\(uid)) failed: \(error)")
             #endif
@@ -199,8 +182,15 @@ final class AuthService: ObservableObject {
     private struct CodeParam: Encodable { let code: String }
 
     private func insertUser(id: String, role: String, schoolId: String, displayName: String, classId: String?) async throws {
+        // Upsert, not insert: a returning student's anonymous auth session
+        // persists across launches (correctly), so `id` here is often an
+        // EXISTING users.id, not a fresh one. A plain insert collides on
+        // the primary key ("duplicate key value violates unique
+        // constraint users_pkey") every time a student re-joins after
+        // their first session. Upserting on `id` updates displayName/
+        // classId for a returning student instead of erroring.
         try await client.from("users")
-            .insert(UserInsert(id: id, role: role, schoolId: schoolId, displayName: displayName, classId: classId))
+            .upsert(UserInsert(id: id, role: role, schoolId: schoolId, displayName: displayName, classId: classId))
             .execute()
     }
 
