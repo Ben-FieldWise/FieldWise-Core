@@ -28,6 +28,11 @@ final class SessionStore: ObservableObject {
     @Published var myResponse: StudentResponse?
     @Published var answers: [String: SessionAnswerValue] = [:]
 
+    /// Every response the student has ever started, across sessions —
+    /// separate from `myResponse` (singular, the one currently being
+    /// filled in) — powers the "My worksheets" completed-work list.
+    @Published var myResponses: [StudentResponse] = []
+
     @Published var isLoading = false
     @Published var errorText: String?
 
@@ -76,6 +81,13 @@ final class SessionStore: ObservableObject {
         await run { self.responses = try await self.service.fetchResponses(sessionId: sessionId) }
     }
 
+    /// Loads every response the student has started, for the "My
+    /// worksheets" list (separate from the single in-progress
+    /// myResponse/answers state used while filling in a worksheet).
+    func loadMyResponses() async {
+        await run { self.myResponses = try await self.service.fetchMyResponses() }
+    }
+
     func markReviewed(_ response: StudentResponse) async {
         await run {
             try await self.service.markReviewed(responseId: response.id)
@@ -90,6 +102,30 @@ final class SessionStore: ObservableObject {
     /// Joins a session by code, then loads the sheet's sections/questions
     /// and the student's (new or existing) response in full, so the
     /// fill-in view has everything it needs in one call.
+    /// Loads full detail for a response the student already has — the
+    /// "reopen a completed/in-progress worksheet from the list" path,
+    /// as opposed to joinAndLoad's "enter a code for the first time"
+    /// path. Populates the same fields WorksheetFillView reads, so it
+    /// can be reused unmodified.
+    func loadResponseDetail(response: StudentResponse, worksheetService: WorksheetService = WorksheetService()) async {
+        await run {
+            let session = try await self.service.fetchSession(id: response.sessionId)
+            let sheet = try await worksheetService.fetchSheet(id: session.sheetId)
+            let sections = try await worksheetService.fetchSections(sheetId: session.sheetId)
+            var map: [String: [WorksheetQuestion]] = [:]
+            for section in sections {
+                map[section.id] = try await worksheetService.fetchQuestions(sectionId: section.id)
+            }
+
+            self.activeSession = session
+            self.mySheet = sheet
+            self.mySections = sections
+            self.myQuestionsBySection = map
+            self.myResponse = response
+            self.answers = response.answers
+        }
+    }
+
     func joinAndLoad(code: String, worksheetService: WorksheetService = WorksheetService()) async {
         await run {
             let joined = try await self.service.joinSession(code: code)

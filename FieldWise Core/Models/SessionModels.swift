@@ -64,7 +64,7 @@ enum StudentResponseStatus: String, Codable {
 /// single jsonb column can hold every question type's answer shape
 /// (string, [String], Int, [[String]] for tables, etc.) without a rigid
 /// Swift enum on the wire.
-struct StudentResponse: Codable, Identifiable, Equatable {
+struct StudentResponse: Codable, Identifiable, Equatable, Hashable {
     var id: String
     var sessionId: String
     var studentId: String
@@ -83,6 +83,20 @@ struct StudentResponse: Codable, Identifiable, Equatable {
         case reviewedAt = "reviewed_at"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
+    }
+
+    // Identity-based Hashable (id only), matching the fix applied to
+    // FieldworkSheet/FieldworkSession — required for
+    // .navigationDestination(item:) in MyWorksheetsView, and avoids the
+    // same bug those fixes addressed: default field-wise hashing would
+    // change as `status`/`answers` mutate (draft -> submitted ->
+    // reviewed), causing a NavigationLink/destination mismatch.
+    static func == (lhs: StudentResponse, rhs: StudentResponse) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

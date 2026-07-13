@@ -33,6 +33,8 @@ struct CoreHomeView: View {
     @State private var isSyncing = false
     @State private var pushWorksheets = false
     @State private var pushJoinSession = false
+    @State private var pushMyWorksheets = false
+    @State private var pushSessions = false
 
 
     var body: some View {
@@ -43,9 +45,9 @@ struct CoreHomeView: View {
                         GreetingHeader(profile: profile)
 
                         if profile.role == .teacher {
-                            TeacherHome(store: store, profile: profile, onWorksheets: { pushWorksheets = true })
+                            TeacherHome(store: store, profile: profile, onWorksheets: { pushWorksheets = true }, onSessions: { pushSessions = true })
                         } else {
-                            StudentHome(store: store, profile: profile, onJoinWorksheet: { pushJoinSession = true })
+                            StudentHome(store: store, profile: profile, onJoinWorksheet: { pushJoinSession = true }, onMyWorksheets: { pushMyWorksheets = true })
 
                         }
 
@@ -67,8 +69,14 @@ struct CoreHomeView: View {
             .navigationDestination(isPresented: $pushWorksheets) {
                 WorksheetListView()
             }
+            .navigationDestination(isPresented: $pushSessions) {
+                AllSessionsView()
+            }
             .navigationDestination(isPresented: $pushJoinSession) {
                 JoinSessionView()
+            }
+            .navigationDestination(isPresented: $pushMyWorksheets) {
+                MyWorksheetsView()
             }
 
             .toolbar {
@@ -155,6 +163,7 @@ private struct TeacherHome: View {
     @ObservedObject var store: ClassroomStore
     let profile: UserProfile
     let onWorksheets: () -> Void
+    let onSessions: () -> Void
     @EnvironmentObject private var nav: AppNavigationCoordinator
 
     private func navCoordinatorGoTo(_ tab: AppTab) { nav.selectedTab = tab }
@@ -220,6 +229,7 @@ private struct TeacherHome: View {
             // Quick actions
             QuickActionsGrid(actions: [
                 .init(title: "Worksheets", icon: "square.and.pencil", color: Color("GeoGreenDark")) { onWorksheets() },
+                .init(title: "Sessions", icon: "qrcode", color: Color("GeoBlue")) { onSessions() },
                 .init(title: "Review work", icon: "checklist", color: Color("BrandGreen")) { navCoordinatorGoTo(.classes) },
                 .init(title: "Plan excursion", icon: "map.circle.fill", color: Color("GeoBlue")) { navCoordinatorGoTo(.excursions) },
                 .init(title: "Sites & map", icon: "mappin.and.ellipse", color: Color("GeoCoral")) { navCoordinatorGoTo(.map) },
@@ -235,6 +245,7 @@ private struct StudentHome: View {
     @ObservedObject var store: ClassroomStore
     let profile: UserProfile
     let onJoinWorksheet: () -> Void
+    let onMyWorksheets: () -> Void
     @EnvironmentObject private var nav: AppNavigationCoordinator
 
 
@@ -311,6 +322,7 @@ private struct StudentHome: View {
             QuickActionsGrid(actions: [
                 .init(title: "My activities", icon: "list.bullet.clipboard.fill", color: Color("BrandGreen")) { nav.selectedTab = .classes },
                 .init(title: "Join worksheet", icon: "qrcode", color: Color("GeoGreenDark")) { onJoinWorksheet() },
+                .init(title: "My worksheets", icon: "checkmark.circle", color: Color("GeoBlue")) { onMyWorksheets() },
                 .init(title: "Excursion", icon: "map.circle.fill", color: Color("GeoBlue")) { nav.selectedTab = .excursions },
                 .init(title: "Map", icon: "mappin.and.ellipse", color: Color("GeoCoral")) { nav.selectedTab = .map },
                 .init(title: "Reports", icon: "doc.plaintext.fill", color: Color("BrandAmber")) { nav.selectedTab = .reports }

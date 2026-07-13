@@ -33,6 +33,19 @@ final class SessionService {
         let updated_at: String
     }
 
+    /// Used by saveDraft only: patches answers/updated_at without
+    /// touching status or submitted_at at all. saveDraft is called from
+    /// WorksheetFillView's .onDisappear as a catch-all autosave for
+    /// text-field edits — that fires regardless of the response's actual
+    /// status, so it must never assume "draft". (AnswersPatch's
+    /// unconditional status: "draft" was overwriting a submitted/
+    /// reviewed response back to draft every time the student simply
+    /// left the screen — a real bug, not just a naming nitpick.)
+    private struct AutosavePatch: Encodable {
+        let answers: [String: SessionAnswerValue]
+        let updated_at: String
+    }
+
     private struct ReviewedPatch: Encodable {
         let status: String
         let reviewed_at: String
@@ -79,6 +92,17 @@ final class SessionService {
             .execute().value
     }
 
+    /// Fetches one session by id. Used by the student-side completed-work
+    /// detail view, which already has a StudentResponse's session_id and
+    /// needs the real session record (code, createdAt) rather than a
+    /// locally-constructed placeholder. Permitted by
+    /// fieldwork_sessions_student_read, since the student genuinely holds
+    /// a response for this session.
+    func fetchSession(id: String) async throws -> FieldworkSession {
+        try await client
+            .from("fieldwork_sessions").select().eq("id", value: id).single().execute().value
+    }
+
     func setSessionStatus(id: String, status: String) async throws {
         let now = ISO8601DateFormatter().string(from: Date())
         try await client.from("fieldwork_sessions")
@@ -114,20 +138,27 @@ final class SessionService {
     /// need broad SELECT on fieldwork_sessions.
     func joinSession(code: String) async throws -> JoinSessionResult {
         let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        print("joinSession: calling RPC with code=\(trimmed)")
         let rows: [JoinSessionResult] = try await client
             .rpc("join_session_by_code", params: CodeParam(code: trimmed)).execute().value
-        print("joinSession: RPC returned \(rows.count) row(s)")
         guard let result = rows.first else { throw AuthError.classCodeNotFound }
-        print("joinSession: result sessionId=\(result.sessionId) responseId=\(result.responseId)")
         return result
     }
 
     func fetchMyResponse(id: String) async throws -> StudentResponse {
-        let session = try? await client.auth.session
-        print("fetchMyResponse: client session uid = \(session?.user.id.uuidString ?? "NIL"), fetching id = \(id)")
-        return try await client
+        try await client
             .from("student_responses").select().eq("id", value: id).single().execute().value
+    }
+
+    /// Every response this student has ever started, across every
+    /// session — powers the student-side "My worksheets" / completed
+    /// work list. student_responses_own_select's RLS (student_id =
+    /// auth.uid()) already scopes this correctly with no session_id
+    /// filter needed.
+    func fetchMyResponses() async throws -> [StudentResponse] {
+        try await client
+            .from("student_responses").select()
+            .order("updated_at", ascending: false)
+            .execute().value
     }
 
     /// Saves the student's current answers as a draft. Safe to call
@@ -136,7 +167,7 @@ final class SessionService {
     /// 'draft'.
     func saveDraft(responseId: String, answers: [String: SessionAnswerValue]) async throws {
         let now = ISO8601DateFormatter().string(from: Date())
-        let patch = AnswersPatch(answers: answers, status: "draft", submitted_at: nil, updated_at: now)
+        let patch = AutosavePatch(answers: answers, updated_at: now)
         try await client.from("student_responses")
             .update(patch).eq("id", value: responseId).execute()
     }

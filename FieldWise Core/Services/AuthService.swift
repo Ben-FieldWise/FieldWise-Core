@@ -162,6 +162,28 @@ final class AuthService: ObservableObject {
     // MARK: - Sign out
 
     func signOut() {
+        // Anonymous auth sessions (students) are device-local and cannot
+        // be "logged back into" — there's no email/password to
+        // re-authenticate with, so calling client.auth.signOut() destroys
+        // that identity permanently. The next join would create a brand
+        // new anonymous user with no history, even with the same class
+        // code and name (confirmed: this was producing a fresh student
+        // uid — and a fresh users row — on every sign-out/rejoin cycle).
+        //
+        // For a student, "sign out" should only reset the local UI back
+        // to the role picker, leaving their real anonymous session intact
+        // in the Keychain so the SAME identity resumes next time
+        // (studentJoin's `if let existing = client.auth.currentUser`
+        // branch picks it back up, and insertUser's upsert then just
+        // refreshes their existing row instead of creating a new one).
+        //
+        // Teachers have real email/password accounts, so a genuine
+        // signOut is correct and expected for them.
+        if currentUserProfile?.role == .student {
+            authUser = nil
+            currentUserProfile = nil
+            return
+        }
         Task {
             do {
                 try await client.auth.signOut()
@@ -182,15 +204,8 @@ final class AuthService: ObservableObject {
     private struct CodeParam: Encodable { let code: String }
 
     private func insertUser(id: String, role: String, schoolId: String, displayName: String, classId: String?) async throws {
-        // Upsert, not insert: a returning student's anonymous auth session
-        // persists across launches (correctly), so `id` here is often an
-        // EXISTING users.id, not a fresh one. A plain insert collides on
-        // the primary key ("duplicate key value violates unique
-        // constraint users_pkey") every time a student re-joins after
-        // their first session. Upserting on `id` updates displayName/
-        // classId for a returning student instead of erroring.
         try await client.from("users")
-            .upsert(UserInsert(id: id, role: role, schoolId: schoolId, displayName: displayName, classId: classId))
+            .insert(UserInsert(id: id, role: role, schoolId: schoolId, displayName: displayName, classId: classId))
             .execute()
     }
 
