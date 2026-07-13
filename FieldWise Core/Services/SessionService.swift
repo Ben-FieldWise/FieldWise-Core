@@ -161,6 +161,32 @@ final class SessionService {
             .execute().value
     }
 
+    /// Minimal shape for fetchDisplayNames — UserProfile.CodingKeys
+    /// deliberately excludes `id` (every other call site fetches one
+    /// known user and attaches id manually via .with(id:) afterward),
+    /// which doesn't work here: this needs each row's own distinct id
+    /// back from a multi-row fetch, so a dedicated small struct is
+    /// simpler and safer than trying to make UserProfile decode id too.
+    private struct DisplayNameRow: Decodable {
+        let id: String
+        let displayName: String
+    }
+
+    /// Resolves a set of student uids to display names in one query,
+    /// for the teacher-facing response list/detail (which otherwise only
+    /// has student_responses.student_id — a bare uid, no name attached).
+    /// Permitted by users_read's RLS (id = auth.uid() OR
+    /// current_user_role() = 'teacher') — a teacher can read any user's
+    /// row, so this needs no new policy, just the join done client-side.
+    func fetchDisplayNames(for studentIds: [String]) async throws -> [String: String] {
+        guard !studentIds.isEmpty else { return [:] }
+        let rows: [DisplayNameRow] = try await client
+            .from("users").select("id, displayName")
+            .in("id", values: studentIds)
+            .execute().value
+        return Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0.displayName) })
+    }
+
     /// Saves the student's current answers as a draft. Safe to call
     /// repeatedly as they work through the sheet (e.g. on question change
     /// or a periodic autosave), since it never advances status past

@@ -25,6 +25,7 @@ enum AuthError: LocalizedError {
     case profileNotFound
     case classCodeNotFound
     case classInactive
+    case yearLevelMismatch
 
     var errorDescription: String? {
         switch self {
@@ -32,6 +33,7 @@ enum AuthError: LocalizedError {
         case .profileNotFound: return "Couldn't find your account details. Try signing in again."
         case .classCodeNotFound: return "That class code doesn't match any active class. Double-check it with your teacher."
         case .classInactive: return "That class code is no longer active. Ask your teacher for a current code."
+        case .yearLevelMismatch: return "That class code is valid, but for a different year level. Double-check with your teacher."
         }
     }
 }
@@ -134,7 +136,7 @@ final class AuthService: ObservableObject {
 
     // MARK: - Student join-by-class-code
 
-    func studentJoin(classCode: String, firstName: String) async {
+    func studentJoin(classCode: String, firstName: String, yearLevel: String) async {
         isLoading = true; lastError = nil
         defer { isLoading = false }
         do {
@@ -143,6 +145,15 @@ final class AuthService: ObservableObject {
             guard !trimmedCode.isEmpty, !trimmedName.isEmpty else { return }
 
             let cls = try await findActiveClass(byCode: trimmedCode)
+
+            // Extra protection against a code shared/leaked to the wrong
+            // cohort: the year level the student selected must match the
+            // class's real year level. A class created before this
+            // feature existed may have yearLevel == nil — treated as "no
+            // check possible" rather than blocking every legacy class.
+            if let classYearLevel = cls.yearLevel, !classYearLevel.isEmpty, classYearLevel != yearLevel {
+                throw AuthError.yearLevelMismatch
+            }
 
             let uid: String
             if let existing = client.auth.currentUser {
@@ -167,16 +178,11 @@ final class AuthService: ObservableObject {
         // re-authenticate with, so calling client.auth.signOut() destroys
         // that identity permanently. The next join would create a brand
         // new anonymous user with no history, even with the same class
-        // code and name (confirmed: this was producing a fresh student
-        // uid — and a fresh users row — on every sign-out/rejoin cycle).
+        // code and name.
         //
         // For a student, "sign out" should only reset the local UI back
         // to the role picker, leaving their real anonymous session intact
-        // in the Keychain so the SAME identity resumes next time
-        // (studentJoin's `if let existing = client.auth.currentUser`
-        // branch picks it back up, and insertUser's upsert then just
-        // refreshes their existing row instead of creating a new one).
-        //
+        // in the Keychain so the SAME identity resumes next time.
         // Teachers have real email/password accounts, so a genuine
         // signOut is correct and expected for them.
         if currentUserProfile?.role == .student {
@@ -198,14 +204,27 @@ final class AuthService: ObservableObject {
     // MARK: - Supabase data helpers (auth-adjacent; full data layer lands in Phase 3)
 
     private struct SchoolRow: Decodable { let id: String }
-    private struct ClassLite: Decodable { let id: String; let name: String; let schoolId: String }
+    // ASSUMES join_class_by_code's RETURNS TABLE is extended to include
+    // yearLevel (see phase1d_add_year_level.sql's companion RPC update,
+    // still pending — the RPC's actual current source wasn't available
+    // when this was written). If the RPC isn't updated to return it,
+    // yearLevel will always decode as nil here and the check in
+    // studentJoin below will need adjusting.
+    private struct ClassLite: Decodable { let id: String; let name: String; let schoolId: String; let yearLevel: String? }
     private struct UserInsert: Encodable { let id: String; let role: String; let schoolId: String; let displayName: String; let classId: String? }
     private struct SchoolInsert: Encodable { let name: String }
     private struct CodeParam: Encodable { let code: String }
 
     private func insertUser(id: String, role: String, schoolId: String, displayName: String, classId: String?) async throws {
+        // Upsert, not insert: a returning student's anonymous auth session
+        // persists across launches (correctly), so `id` here is often an
+        // EXISTING users.id, not a fresh one. A plain insert collides on
+        // the primary key ("duplicate key value violates unique
+        // constraint users_pkey") every time a student re-joins after
+        // their first session. Upserting on `id` updates displayName/
+        // classId for a returning student instead of erroring.
         try await client.from("users")
-            .insert(UserInsert(id: id, role: role, schoolId: schoolId, displayName: displayName, classId: classId))
+            .upsert(UserInsert(id: id, role: role, schoolId: schoolId, displayName: displayName, classId: classId))
             .execute()
     }
 

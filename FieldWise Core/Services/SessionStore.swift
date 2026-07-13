@@ -19,6 +19,7 @@ final class SessionStore: ObservableObject {
     // Teacher side
     @Published var sessions: [FieldworkSession] = []
     @Published var responses: [StudentResponse] = []
+    @Published var displayNamesByStudentId: [String: String] = [:]
 
     // Student side
     @Published var activeSession: FieldworkSession?
@@ -78,7 +79,11 @@ final class SessionStore: ObservableObject {
     // MARK: - Teacher: review responses
 
     func loadResponses(sessionId: String) async {
-        await run { self.responses = try await self.service.fetchResponses(sessionId: sessionId) }
+        await run {
+            self.responses = try await self.service.fetchResponses(sessionId: sessionId)
+            let studentIds = Array(Set(self.responses.map { $0.studentId }))
+            self.displayNamesByStudentId = try await self.service.fetchDisplayNames(for: studentIds)
+        }
     }
 
     /// Loads every response the student has started, for the "My

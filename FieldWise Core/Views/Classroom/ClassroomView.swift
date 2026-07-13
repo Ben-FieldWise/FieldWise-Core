@@ -40,6 +40,7 @@ private struct TeacherClassroomView: View {
     @ObservedObject var store: ClassroomStore
     let profile: UserProfile
     @State private var newClassName = ""
+    @State private var newClassYearLevel: YearLevel = .year7
 
     var body: some View {
         NavigationStack {
@@ -62,9 +63,17 @@ private struct TeacherClassroomView: View {
                                         Text(cls.name)
                                             .font(.system(size: 16, weight: .semibold))
                                             .foregroundColor(.primary)
-                                        Text("Code: \(cls.classCode)")
-                                            .font(.system(size: 13))
-                                            .foregroundColor(.secondary)
+                                        HStack(spacing: 6) {
+                                            if let yearLevel = cls.yearLevel, !yearLevel.isEmpty {
+                                                Text(yearLevel)
+                                                    .font(.system(size: 13, weight: .medium))
+                                                    .foregroundColor(Color("BrandGreen"))
+                                                Text("·").foregroundColor(.secondary)
+                                            }
+                                            Text("Code: \(cls.classCode)")
+                                                .font(.system(size: 13))
+                                                .foregroundColor(.secondary)
+                                        }
                                     }
                                     Spacer()
                                     StatusPill(text: cls.active ? "Active" : "Closed",
@@ -81,12 +90,19 @@ private struct TeacherClassroomView: View {
                     GeoCard {
                         VStack(alignment: .leading, spacing: 10) {
                             FieldLabel(text: "New class")
-                            GeoTextField(placeholder: "e.g. Year 10 Geography B", text: $newClassName)
+                            GeoTextField(placeholder: "e.g. Geography B", text: $newClassName)
+                            Picker("Year level", selection: $newClassYearLevel) {
+                                ForEach(YearLevel.allCases) { level in
+                                    Text(level.rawValue).tag(level)
+                                }
+                            }
+                            .pickerStyle(.menu)
                             PrimaryButton(title: "Create class", iconName: "plus") {
                                 let name = newClassName
+                                let yearLevel = newClassYearLevel
                                 newClassName = ""
                                 Task {
-                                    await store.createClass(name: name, teacherId: profile.id, schoolId: profile.schoolId)
+                                    await store.createClass(name: name, teacherId: profile.id, schoolId: profile.schoolId, yearLevel: yearLevel.rawValue)
                                 }
                             }
                         }

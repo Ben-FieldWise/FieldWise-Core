@@ -30,9 +30,9 @@ final class ClassroomStore: ObservableObject {
         await run { self.classes = try await self.service.fetchClasses(teacherId: teacherId) }
     }
 
-    func createClass(name: String, teacherId: String, schoolId: String) async {
+    func createClass(name: String, teacherId: String, schoolId: String, yearLevel: String?) async {
         let code = Self.generateCode()
-        let draft = SchoolClass.new(teacherId: teacherId, schoolId: schoolId, name: name, classCode: code)
+        let draft = SchoolClass.new(teacherId: teacherId, schoolId: schoolId, name: name, classCode: code, yearLevel: yearLevel)
         await run {
             let created = try await self.service.createClass(draft)
             self.classes.insert(created, at: 0)

@@ -323,12 +323,27 @@ struct StudentJoinForm: View {
     @EnvironmentObject private var authService: AuthService
     @State private var classCode = ""
     @State private var firstName = ""
+    @State private var yearLevel: YearLevel = .year7
 
     var body: some View {
         VStack(spacing: 16) {
             VStack(spacing: 12) {
                 BrandTextField("Class code (e.g. RIV-294)", text: $classCode, autoCapitalise: .allCharacters)
                 BrandTextField("Your first name", text: $firstName)
+                Picker("Year level", selection: $yearLevel) {
+                    ForEach(YearLevel.allCases) { level in
+                        Text(level.rawValue).tag(level)
+                    }
+                }
+                .pickerStyle(.menu)
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color("GeoSurface"))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5)
+                )
             }
 
             if authService.isLoading {
@@ -338,7 +353,8 @@ struct StudentJoinForm: View {
                     Task {
                         await authService.studentJoin(
                             classCode: classCode,
-                            firstName: firstName
+                            firstName: firstName,
+                            yearLevel: yearLevel.rawValue
                         )
                     }
                 } label: {
@@ -354,7 +370,7 @@ struct StudentJoinForm: View {
                           firstName.trimmingCharacters(in: .whitespaces).isEmpty)
             }
 
-            Text("No email or account needed — just your class code and first name.")
+            Text("No email or account needed — just your class code, first name, and year level.")
                 .font(.system(size: 12))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

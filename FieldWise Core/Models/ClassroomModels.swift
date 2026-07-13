@@ -19,6 +19,22 @@ import Foundation
 
 // MARK: - Role
 
+/// Fixed Year 7–12 range, stored as SchoolClass.yearLevel (plain string,
+/// e.g. "Year 10") so the DB column stays simple text — the fixed set of
+/// options lives here in one place and is reused by the class-creation
+/// picker, the student join form's picker, and anywhere a year level is
+/// displayed, so all three always offer/expect exactly the same values.
+enum YearLevel: String, CaseIterable, Identifiable {
+    case year7 = "Year 7"
+    case year8 = "Year 8"
+    case year9 = "Year 9"
+    case year10 = "Year 10"
+    case year11 = "Year 11"
+    case year12 = "Year 12"
+
+    var id: String { rawValue }
+}
+
 enum UserRole: String, Codable {
     case teacher
     case student
@@ -68,11 +84,12 @@ struct SchoolClass: Codable, Identifiable, Equatable {
     var schoolId: String
     var name: String
     var classCode: String
+    var yearLevel: String?
     var active: Bool
     var createdAt: Date?
 
     enum CodingKeys: String, CodingKey {
-        case teacherId, schoolId, name, classCode, active, createdAt
+        case teacherId, schoolId, name, classCode, yearLevel, active, createdAt
     }
 
     func with(id: String) -> SchoolClass {
@@ -81,8 +98,8 @@ struct SchoolClass: Codable, Identifiable, Equatable {
         return copy
     }
 
-    static func new(teacherId: String, schoolId: String, name: String, classCode: String) -> SchoolClass {
-        SchoolClass(teacherId: teacherId, schoolId: schoolId, name: name, classCode: classCode, active: true, createdAt: Date())
+    static func new(teacherId: String, schoolId: String, name: String, classCode: String, yearLevel: String?) -> SchoolClass {
+        SchoolClass(teacherId: teacherId, schoolId: schoolId, name: name, classCode: classCode, yearLevel: yearLevel, active: true, createdAt: Date())
     }
 }
 
