@@ -33,6 +33,12 @@
 			</array>
 		</dict>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fieldwisegeography</string>
+		<string>fieldwisehistory</string>
+		<string>fieldwiseagriculture</string>
+	</array>
 	<key>MKDirectionsApplicationSupportedModes</key>
 	<array/>
 	<key>NSAppTransportSecurity</key>

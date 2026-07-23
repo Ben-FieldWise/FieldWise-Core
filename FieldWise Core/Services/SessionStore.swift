@@ -76,6 +76,49 @@ final class SessionStore: ObservableObject {
         }
     }
 
+    /// Edits a session's class and/or code from SessionEditView, then
+    /// updates the local copy in-place so the list/grouping reflects the
+    /// change immediately without a full reload.
+    func updateSession(_ session: FieldworkSession, classId: String, sessionCode: String) async {
+        await run {
+            try await self.service.updateSession(id: session.id, classId: classId, sessionCode: sessionCode)
+            if let i = self.sessions.firstIndex(where: { $0.id == session.id }) {
+                self.sessions[i].classId = classId
+                self.sessions[i].sessionCode = sessionCode
+            }
+        }
+    }
+
+    /// How many student responses exist for a session — used to show a
+    /// stronger warning before deletion. Not cached; called on-demand
+    /// right before showing the delete confirmation.
+    func responseCount(for session: FieldworkSession) async -> Int {
+        (try? await service.countResponses(sessionId: session.id)) ?? 0
+    }
+
+    func deleteSession(_ session: FieldworkSession) async {
+        await run {
+            try await self.service.deleteSession(id: session.id)
+            self.sessions.removeAll { $0.id == session.id }
+        }
+    }
+
+    /// Bulk versions for multi-select on AllSessionsView — sequential
+    /// rather than parallel, since these are simple owner-scoped writes
+    /// and a teacher bulk-acting on a handful of sessions doesn't need
+    /// the complexity of concurrent execution.
+    func closeSessions(_ sessionsToClose: [FieldworkSession]) async {
+        for session in sessionsToClose { await closeSession(session) }
+    }
+
+    func reopenSessions(_ sessionsToReopen: [FieldworkSession]) async {
+        for session in sessionsToReopen { await reopenSession(session) }
+    }
+
+    func deleteSessions(_ sessionsToDelete: [FieldworkSession]) async {
+        for session in sessionsToDelete { await deleteSession(session) }
+    }
+
     // MARK: - Teacher: review responses
 
     func loadResponses(sessionId: String) async {
@@ -112,7 +155,8 @@ final class SessionStore: ObservableObject {
     /// as opposed to joinAndLoad's "enter a code for the first time"
     /// path. Populates the same fields WorksheetFillView reads, so it
     /// can be reused unmodified.
-    func loadResponseDetail(response: StudentResponse, worksheetService: WorksheetService = WorksheetService()) async {
+    func loadResponseDetail(response: StudentResponse, worksheetService: WorksheetService? = nil) async {
+        let worksheetService = worksheetService ?? WorksheetService()
         await run {
             let session = try await self.service.fetchSession(id: response.sessionId)
             let sheet = try await worksheetService.fetchSheet(id: session.sheetId)
@@ -131,7 +175,8 @@ final class SessionStore: ObservableObject {
         }
     }
 
-    func joinAndLoad(code: String, worksheetService: WorksheetService = WorksheetService()) async {
+    func joinAndLoad(code: String, worksheetService: WorksheetService? = nil) async {
+        let worksheetService = worksheetService ?? WorksheetService()
         await run {
             let joined = try await self.service.joinSession(code: code)
             let sheet = try await worksheetService.fetchSheet(id: joined.sheetId)

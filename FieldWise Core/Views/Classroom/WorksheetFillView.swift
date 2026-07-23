@@ -150,6 +150,28 @@ struct WorksheetFillView: View {
             .strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5))
     }
 
+    // MARK: - Seed value fallback
+
+    /// The answer to actually display for a question: the student's own
+    /// recorded answer if one exists, otherwise the question's seedValue
+    /// (set only on worksheets imported from a FieldWise Geography
+    /// investigation — see GeographyImportService). Every read site below
+    /// goes through this rather than reading `store.answers` directly, so
+    /// a freshly-joined student sees the imported investigation's
+    /// original data as a starting point instead of a blank question.
+    ///
+    /// Deliberately does NOT write the seed into `store.answers` on
+    /// read — it stays a display-only fallback until the student actually
+    /// edits the field (at which point setAnswer/saveDraft persist their
+    /// real edit as normal). This keeps "has this student actually
+    /// answered yet" meaningful for unansweredRequiredCount and for a
+    /// teacher reviewing responses later, rather than every imported
+    /// worksheet's first response looking pre-answered before anyone
+    /// touched it.
+    private func effectiveAnswer(for question: WorksheetQuestion) -> SessionAnswerValue? {
+        store.answers[question.id] ?? question.options.seedValue?.asAnswerValue
+    }
+
     // MARK: - Per-type question rendering
 
     @ViewBuilder
@@ -177,11 +199,11 @@ struct WorksheetFillView: View {
     private func answerControl(for question: WorksheetQuestion) -> some View {
         switch question.questionType {
         case .shortAnswer:
-            TextField("Your answer", text: stringBinding(question.id))
+            TextField("Your answer", text: stringBinding(question))
                 .textFieldStyle(.roundedBorder)
 
         case .longAnswer:
-            TextField("Your answer", text: stringBinding(question.id), axis: .vertical)
+            TextField("Your answer", text: stringBinding(question), axis: .vertical)
                 .lineLimit(4...8)
                 .textFieldStyle(.roundedBorder)
 
@@ -190,7 +212,7 @@ struct WorksheetFillView: View {
                 ForEach(question.options.choices ?? [], id: \.self) { choice in
                     choiceRow(
                         label: choice,
-                        selected: store.answers[question.id]?.stringValue == choice,
+                        selected: effectiveAnswer(for: question)?.stringValue == choice,
                         style: .radio
                     ) {
                         store.setAnswer(.string(choice), for: question.id)
@@ -202,9 +224,9 @@ struct WorksheetFillView: View {
         case .checkbox:
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(question.options.choices ?? [], id: \.self) { choice in
-                    let selected = store.answers[question.id]?.stringArrayValue.contains(choice) ?? false
+                    let selected = effectiveAnswer(for: question)?.stringArrayValue.contains(choice) ?? false
                     choiceRow(label: choice, selected: selected, style: .checkbox) {
-                        var current = store.answers[question.id]?.stringArrayValue ?? []
+                        var current = effectiveAnswer(for: question)?.stringArrayValue ?? []
                         if selected { current.removeAll { $0 == choice } }
                         else { current.append(choice) }
                         store.setAnswer(.stringArray(current), for: question.id)
@@ -218,7 +240,7 @@ struct WorksheetFillView: View {
             let max = question.options.max ?? 5
             HStack(spacing: 10) {
                 ForEach(min...max, id: \.self) { value in
-                    let selected = store.answers[question.id]?.intValue == value
+                    let selected = effectiveAnswer(for: question)?.intValue == value
                     Button {
                         store.setAnswer(.int(value), for: question.id)
                         Task { await store.saveDraft() }
@@ -333,11 +355,11 @@ struct WorksheetFillView: View {
     /// Required-question validation checks for a trimmed-empty string,
     /// not for the key being absent, so this doesn't affect the "still
     /// needs an answer" count.
-    private func stringBinding(_ questionId: String) -> Binding<String> {
+    private func stringBinding(_ question: WorksheetQuestion) -> Binding<String> {
         Binding(
-            get: { store.answers[questionId]?.stringValue ?? "" },
+            get: { effectiveAnswer(for: question)?.stringValue ?? "" },
             set: { newValue in
-                store.setAnswer(.string(newValue), for: questionId)
+                store.setAnswer(.string(newValue), for: question.id)
             }
         )
     }

@@ -129,6 +129,20 @@ final class SupabaseService {
         return rows.map { $0.toModel() }
     }
 
+    /// No FK cascade is assumed here (unlike WorksheetService's
+    /// deleteSheet, which relies on ON DELETE CASCADE for sections/
+    /// questions) — fieldworkEntries referencing this task are left
+    /// as-is. That matches this feature's existing behavior: entries
+    /// aren't shown anywhere once their parent task is gone from the
+    /// task list, and no other code path currently reads an entry
+    /// without first looking up its task, so this doesn't create a
+    /// visible orphan. If a stronger guarantee is needed later, delete
+    /// should first fetch and remove matching fieldworkEntries rows, or
+    /// the fieldworkEntries table should get an ON DELETE CASCADE FK.
+    func deleteTask(id: String) async throws {
+        try await client.from("fieldworkTasks").delete().eq("id", value: id).execute()
+    }
+
     // MARK: - Fieldwork entries
 
     /// Offline-first save — persists locally and syncs when online.

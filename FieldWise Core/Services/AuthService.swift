@@ -67,6 +67,14 @@ final class AuthService: ObservableObject {
         authListener = Task { [weak self] in
             guard let self else { return }
             for await (_, session) in client.auth.authStateChanges {
+                if let session, session.isExpired {
+                    // The SDK will attempt a background refresh. Keep the auth gate
+                    // closed until a valid token refresh event arrives.
+                    self.authUser = nil
+                    self.currentUserProfile = nil
+                    continue
+                }
+
                 self.authUser = session?.user
                 if let user = session?.user {
                     await self.refreshProfile(uid: user.id.uuidString.lowercased())

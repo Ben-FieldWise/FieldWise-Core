@@ -60,25 +60,25 @@ struct ContentView: View {
 
     private var mainTabView: some View {
         TabView(selection: $navCoordinator.selectedTab) {
-            CoreHomeView()
-                .tabItem { Label("Home", systemImage: "house.fill") }
+            CoreHubView()
+                .tabItem { Label("Home", systemImage: "square.grid.2x2.fill") }
                 .tag(AppTab.home)
 
             ClassroomView()
-                .tabItem { Label("Classes", systemImage: "person.2.fill") }
+                .tabItem { Label("Classes", systemImage: "person.3.fill") }
                 .tag(AppTab.classes)
 
+            CoreActivitiesView()
+                .tabItem { Label("Activities", systemImage: "rectangle.3.group.fill") }
+                .tag(AppTab.activities)
+
             PlanRootView()
-                .tabItem { Label("Excursions", systemImage: "map.circle.fill") }
+                .tabItem { Label("Fieldwork", systemImage: "figure.hiking") }
                 .tag(AppTab.excursions)
 
-            MapSectionView()
-                .tabItem { Label("Map", systemImage: "map.fill") }
-                .tag(AppTab.map)
-
-            FieldChecklistView()
-                .tabItem { Label("Reports", systemImage: "doc.plaintext.fill") }
-                .tag(AppTab.reports)
+            CoreMoreView()
+                .tabItem { Label("More", systemImage: "ellipsis.circle.fill") }
+                .tag(AppTab.more)
         }
         .tint(Color("BrandGreen"))
     }
@@ -436,7 +436,7 @@ struct BrandTextField: View {
 /// (landforms, weather, soils, coasts) deliberately live in the subject
 /// apps, not here — that's the Core boundary.
 enum AppTab: Hashable {
-    case home, classes, excursions, map, reports
+    case home, classes, activities, excursions, more
 }
 
 /// Lets any tab request a switch to another tab — used by "View on Map"
@@ -446,7 +446,7 @@ final class AppNavigationCoordinator: ObservableObject {
     @Published var selectedTab: AppTab = .home
 
     func goToMap() {
-        selectedTab = .map
+        selectedTab = .more
     }
 }
 

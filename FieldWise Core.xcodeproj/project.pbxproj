@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5F4E6E41300F305200A43033 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 5F4E6E40300F305200A43033 /* Supabase */; };
 		5F71D9752FF7BFB900B921B3 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 5F71D9742FF7BFB900B921B3 /* Supabase */; };
 /* End PBXBuildFile section */
 
@@ -84,6 +85,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F4E6E41300F305200A43033 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -185,6 +187,7 @@
 			);
 			name = "FieldWise CoreUITests";
 			packageProductDependencies = (
+				5F4E6E40300F305200A43033 /* Supabase */,
 			);
 			productName = "FieldWise CoreUITests";
 			productReference = 5FBB032F2FE4F52D00178BD2 /* FieldWise CoreUITests.xctest */;
@@ -539,6 +542,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XDUT93WTB4;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.com.fieldwiseeducation.fieldwisecore.UITests;
@@ -558,6 +562,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XDUT93WTB4;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.com.fieldwiseeducation.fieldwisecore.UITests;
@@ -625,6 +630,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5F4E6E40300F305200A43033 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5F71D9732FF7BE4200B921B3 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
 		5F71D9742FF7BFB900B921B3 /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5F71D9732FF7BE4200B921B3 /* XCRemoteSwiftPackageReference "supabase-swift" */;

@@ -31,7 +31,10 @@ nonisolated final class SupabaseManager {
     private init() {
         client = SupabaseClient(
             supabaseURL: SupabaseConfig.url,
-            supabaseKey: SupabaseConfig.publishableKey
+            supabaseKey: SupabaseConfig.publishableKey,
+            options: SupabaseClientOptions(
+                auth: .init(emitLocalSessionAsInitialSession: true)
+            )
         )
     }
 

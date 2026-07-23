@@ -15,6 +15,8 @@ import Combine
 final class ClassroomStore: ObservableObject {
 
     private let service = SupabaseService()
+    private let sessionService = SessionService()
+    private let worksheetService = WorksheetService()
 
     @Published var classes: [SchoolClass] = []      // teacher's classes
     @Published var currentClass: SchoolClass?       // student's class
@@ -23,6 +25,15 @@ final class ClassroomStore: ObservableObject {
     @Published var myEntries: [FieldworkEntry] = []      // student's own
     @Published var isLoading = false
     @Published var errorText: String?
+
+    /// Worksheet sessions assigned to the class currently being viewed
+    /// (ClassDetailView's "Worksheets" section) — populated by
+    /// loadClassSessions, alongside the sheet title for each one (a
+    /// session only stores sheet_id, not the sheet's own title, so this
+    /// mirrors SessionsView's own "fetch separately, cross-reference by
+    /// dictionary" convention rather than requiring a joined query).
+    @Published var classSessions: [FieldworkSession] = []
+    @Published var sheetTitlesBySheetId: [String: String] = [:]
 
     // MARK: - Teacher
 
@@ -61,8 +72,38 @@ final class ClassroomStore: ObservableObject {
         }
     }
 
+    func deleteTask(_ task: FieldworkTask) async {
+        await run {
+            try await self.service.deleteTask(id: task.id)
+            self.tasks.removeAll { $0.id == task.id }
+        }
+    }
+
     func loadClassEntries(classId: String) async {
         await run { self.classEntries = try await self.service.fetchClassEntries(classId: classId) }
+    }
+
+    /// Loads the sessions assigned to this class, plus the title of each
+    /// one's worksheet. Sheet titles are fetched individually per unique
+    /// sheet_id (a class typically has a small number of distinct
+    /// worksheets assigned, so this stays cheap) rather than via a
+    /// joined query, matching this file's existing style of separate
+    /// fetches cross-referenced by dictionary (see SessionsView's own
+    /// classroomStore/store split for the same pattern).
+    func loadClassSessions(classId: String) async {
+        await run {
+            let sessions = try await self.sessionService.fetchSessions(classId: classId)
+            self.classSessions = sessions
+
+            let uniqueSheetIds = Set(sessions.map { $0.sheetId })
+            var titles: [String: String] = [:]
+            for sheetId in uniqueSheetIds {
+                if let sheet = try? await self.worksheetService.fetchSheet(id: sheetId) {
+                    titles[sheetId] = sheet.title
+                }
+            }
+            self.sheetTitlesBySheetId = titles
+        }
     }
 
     // MARK: - Student
@@ -102,4 +143,3 @@ final class ClassroomStore: ObservableObject {
         return String((0..<6).map { _ in chars.randomElement()! })
     }
 }
-

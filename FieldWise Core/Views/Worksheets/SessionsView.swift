@@ -20,10 +20,13 @@ struct SessionsView: View {
     let sheet: FieldworkSheet
     @EnvironmentObject private var authService: AuthService
     @StateObject private var store = SessionStore()
+    @StateObject private var classroomStore = ClassroomStore()
 
     @State private var showingNewConfirm = false
     @State private var newlyCreated: FieldworkSession?
     @State private var selectedSession: FieldworkSession?
+    @State private var showingClassPicker = false
+    @State private var editingSession: FieldworkSession?
 
     var body: some View {
         Group {
@@ -41,13 +44,19 @@ struct SessionsView: View {
         .navigationDestination(item: $selectedSession) { session in
             SessionResponsesView(session: session)
         }
+        .navigationDestination(item: $editingSession) { session in
+            SessionEditView(session: session, store: store)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { Task { await createSession() } } label: { Image(systemName: "plus") }
+                Button { showingClassPicker = true } label: { Image(systemName: "plus") }
                     .tint(Color("BrandGreen"))
             }
         }
-        .task { await store.loadSessions(sheetId: sheet.id) }
+        .task {
+            await store.loadSessions(sheetId: sheet.id)
+            if let uid = authService.uid { await classroomStore.loadTeacherClasses(teacherId: uid) }
+        }
         .alert("Something went wrong", isPresented: .constant(store.errorText != nil), actions: {
             Button("OK") { store.errorText = nil }
         }, message: {
@@ -56,6 +65,16 @@ struct SessionsView: View {
         .sheet(item: $newlyCreated) { session in
             NewSessionCodeSheet(session: session)
         }
+        .sheet(isPresented: $showingClassPicker) {
+            ClassPickerSheet(classes: classroomStore.classes) { cls in
+                showingClassPicker = false
+                Task { await createSession(classId: cls.id) }
+            }
+        }
+    }
+
+    private var classesById: [String: SchoolClass] {
+        Dictionary(uniqueKeysWithValues: classroomStore.classes.map { ($0.id, $0) })
     }
 
     private var list: some View {
@@ -65,7 +84,7 @@ struct SessionsView: View {
                     selectedSession = session
                 } label: {
                     HStack {
-                        SessionRow(session: session)
+                        SessionRow(session: session, className: session.classId.flatMap { classesById[$0]?.name })
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.system(size: 13, weight: .semibold))
@@ -81,6 +100,8 @@ struct SessionsView: View {
                         Button("Reopen") { Task { await store.reopenSession(session) } }
                             .tint(Color("BrandGreen"))
                     }
+                    Button("Edit") { editingSession = session }
+                        .tint(Color("GeoBlue"))
                 }
             }
         }
@@ -101,7 +122,7 @@ struct SessionsView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 32)
             Button {
-                Task { await createSession() }
+                showingClassPicker = true
             } label: {
                 Label("Create session", systemImage: "plus.circle.fill")
                     .font(.system(size: 15, weight: .semibold))
@@ -112,9 +133,9 @@ struct SessionsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private func createSession() async {
+    private func createSession(classId: String) async {
         guard let uid = authService.uid else { return }
-        if let created = await store.publish(sheetId: sheet.id, teacherId: uid) {
+        if let created = await store.publish(sheetId: sheet.id, teacherId: uid, classId: classId) {
             newlyCreated = created
         }
     }
@@ -124,6 +145,7 @@ struct SessionsView: View {
 
 private struct SessionRow: View {
     let session: FieldworkSession
+    let className: String?
 
     private var dateText: String {
         guard let d = session.createdAt else { return "" }
@@ -137,8 +159,16 @@ private struct SessionRow: View {
                 Text(session.sessionCode)
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
                     .foregroundColor(.primary)
-                if !dateText.isEmpty {
-                    Text(dateText).font(.system(size: 12)).foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                    if let className {
+                        Text(className)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color("BrandGreen"))
+                        Text("·").foregroundColor(.secondary)
+                    }
+                    if !dateText.isEmpty {
+                        Text(dateText).font(.system(size: 12)).foregroundColor(.secondary)
+                    }
                 }
             }
             Spacer()

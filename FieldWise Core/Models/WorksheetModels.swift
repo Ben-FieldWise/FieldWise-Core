@@ -69,6 +69,67 @@ enum WorksheetQuestionType: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// A single seed/default value carried on an imported question — the
+/// original recorded answer from a Geography investigation, used to
+/// pre-populate a fresh student_responses row the first time someone
+/// answers this question in Core. Nil for every question authored
+/// directly in Core (the Phase 1A/1D builder never sets this).
+///
+/// Kept as its own type rather than reusing SessionAnswerValue:
+/// SessionAnswerValue's Codable implementation is a decoder-only "try
+/// each shape in turn" pattern tuned for round-tripping
+/// student_responses.answers, and an Int-shaped seed value would be
+/// genuinely ambiguous against WorksheetQuestionOptions' own
+/// `min`/`max: Int?` fields if decoded the same permissive way. The
+/// explicit `kind` tag here avoids that.
+enum SeedValue: Codable, Equatable {
+    case string(String)
+    case stringArray([String])
+    case int(Int)
+
+    private enum Kind: String, Codable { case string, stringArray, int }
+    private enum CodingKeys: String, CodingKey { case kind, value }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let kind = try c.decode(Kind.self, forKey: .kind)
+        switch kind {
+        case .string: self = .string(try c.decode(String.self, forKey: .value))
+        case .stringArray: self = .stringArray(try c.decode([String].self, forKey: .value))
+        case .int: self = .int(try c.decode(Int.self, forKey: .value))
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .string(let v):
+            try c.encode(Kind.string, forKey: .kind)
+            try c.encode(v, forKey: .value)
+        case .stringArray(let v):
+            try c.encode(Kind.stringArray, forKey: .kind)
+            try c.encode(v, forKey: .value)
+        case .int(let v):
+            try c.encode(Kind.int, forKey: .kind)
+            try c.encode(v, forKey: .value)
+        }
+    }
+
+    /// Converts to the shape SessionAnswerValue needs when pre-populating
+    /// a fresh response — see WorksheetFillView's initial-value fallback.
+    /// SessionAnswerValue is defined in SessionModels.swift (Phase 1C),
+    /// not this file; its .string/.stringArray/.int cases are the ones
+    /// this seed data actually needs (it also has .table and .null,
+    /// which SeedValue never produces).
+    var asAnswerValue: SessionAnswerValue {
+        switch self {
+        case .string(let v): return .string(v)
+        case .stringArray(let v): return .stringArray(v)
+        case .int(let v): return .int(v)
+        }
+    }
+}
+
 /// Flexible option payload stored in the `options` jsonb column. All
 /// optional so an empty `{}` decodes cleanly and unused fields are omitted.
 struct WorksheetQuestionOptions: Codable, Equatable {
@@ -76,9 +137,12 @@ struct WorksheetQuestionOptions: Codable, Equatable {
     var min: Int?              // rating_scale
     var max: Int?              // rating_scale
     var columns: [String]?     // data_table
+    var seedValue: SeedValue?  // set only by the Geography import; nil otherwise
 
-    init(choices: [String]? = nil, min: Int? = nil, max: Int? = nil, columns: [String]? = nil) {
+    init(choices: [String]? = nil, min: Int? = nil, max: Int? = nil, columns: [String]? = nil,
+         seedValue: SeedValue? = nil) {
         self.choices = choices; self.min = min; self.max = max; self.columns = columns
+        self.seedValue = seedValue
     }
 }
 
@@ -112,15 +176,6 @@ struct FieldworkSheet: Codable, Identifiable, Hashable {
         case updatedAt = "updated_at"
     }
 
-    // Custom Hashable/Equatable: identity for navigation purposes (and any
-    // other place this type is used as a NavigationLink/dictionary/Set
-    // value) should be `id` alone, matching Identifiable. The default
-    // synthesized Hashable hashes every stored property, so if `updatedAt`
-    // (or any other field) changes on a row between when a NavigationLink
-    // is created and when SwiftUI resolves the tap against its
-    // .navigationDestination(for:), the hash no longer matches and the
-    // link silently fails to activate ("no matching navigationDestination
-    // declaration" / "declared earlier on the stack").
     static func == (lhs: FieldworkSheet, rhs: FieldworkSheet) -> Bool {
         lhs.id == rhs.id
     }
@@ -132,7 +187,7 @@ struct FieldworkSheet: Codable, Identifiable, Hashable {
 
 // MARK: - Section
 
-struct WorksheetSection: Codable, Identifiable, Equatable {
+struct WorksheetSection: Codable, Identifiable, Equatable, Hashable {
     var id: String
     var sheetId: String
     var title: String
@@ -145,6 +200,21 @@ struct WorksheetSection: Codable, Identifiable, Equatable {
         case sheetId = "sheet_id"
         case sectionOrder = "section_order"
         case createdAt = "created_at"
+    }
+
+    // Identity-based Hashable/Equatable (id only), matching
+    // FieldworkSheet's rationale above: this type now drives
+    // .navigationDestination(item:) in SheetEditorView (for
+    // QuestionReorderView), and default field-wise hashing would change
+    // as `title`/`instructions`/`sectionOrder` are edited, risking the
+    // same "no matching navigationDestination" failure documented on
+    // FieldworkSheet.
+    static func == (lhs: WorksheetSection, rhs: WorksheetSection) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

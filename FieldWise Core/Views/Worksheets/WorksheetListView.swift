@@ -16,6 +16,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct WorksheetListView: View {
     @EnvironmentObject private var authService: AuthService
@@ -23,6 +24,11 @@ struct WorksheetListView: View {
     @State private var showingNew = false
     @State private var selectedSheet: FieldworkSheet?
     @State private var hasSettled = false
+
+    // Geography .fieldwise.json import
+    @State private var showingFileImporter = false
+    @State private var isImporting = false
+    @State private var importErrorText: String?
 
     var body: some View {
         Group {
@@ -42,8 +48,22 @@ struct WorksheetListView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { showingNew = true } label: { Image(systemName: "plus") }
-                    .tint(Color("BrandGreen"))
+                Menu {
+                    Button {
+                        showingNew = true
+                    } label: {
+                        Label("New worksheet", systemImage: "plus")
+                    }
+                    Button {
+                        showingFileImporter = true
+                    } label: {
+                        Label("Import from Geography", systemImage: "square.and.arrow.down")
+                    }
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .tint(Color("BrandGreen"))
+                .disabled(isImporting)
             }
         }
         .sheet(isPresented: $showingNew) {
@@ -58,6 +78,30 @@ struct WorksheetListView: View {
                         // own NavigationLink once it appears; nothing more to do.
                         _ = created
                     }
+                }
+            }
+        }
+        .fileImporter(
+            isPresented: $showingFileImporter,
+            allowedContentTypes: [.json, UTType(filenameExtension: "json") ?? .json],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                Task { await importFromGeography(url) }
+            case .failure(let error):
+                importErrorText = error.localizedDescription
+            }
+        }
+        .overlay {
+            if isImporting {
+                ZStack {
+                    Color.black.opacity(0.15).ignoresSafeArea()
+                    ProgressView("Importing…")
+                        .padding(20)
+                        .background(.regularMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
             }
         }
@@ -79,6 +123,41 @@ struct WorksheetListView: View {
         }, message: {
             Text(store.errorText ?? "")
         })
+        .alert("Couldn't import file", isPresented: .constant(importErrorText != nil), actions: {
+            Button("OK") { importErrorText = nil }
+        }, message: {
+            Text(importErrorText ?? "")
+        })
+    }
+
+    // MARK: - Geography import
+
+    /// Reads a .fieldwise.json the person picked, decodes it, builds the
+    /// worksheet via GeographyImportService, then navigates straight into
+    /// the new sheet the same way tapping a row does.
+    ///
+    /// url.startAccessingSecurityScopedResource() is required here because
+    /// fileImporter hands back a security-scoped URL (the file may live
+    /// outside the app's sandbox, e.g. iCloud Drive or AirDrop) — reading
+    /// its contents without this call fails silently on-device even though
+    /// it may work fine in the simulator.
+    private func importFromGeography(_ url: URL) async {
+        guard let uid = authService.uid else { return }
+        isImporting = true
+        defer { isImporting = false }
+
+        let didAccess = url.startAccessingSecurityScopedResource()
+        defer { if didAccess { url.stopAccessingSecurityScopedResource() } }
+
+        do {
+            let data = try Data(contentsOf: url)
+            let imported = try GeographyImportService.decode(data)
+            let sheet = try await GeographyImportService.importInvestigation(imported, createdBy: uid)
+            await store.loadMySheets(teacherId: uid)
+            selectedSheet = sheet
+        } catch {
+            importErrorText = error.localizedDescription
+        }
     }
 
     private var list: some View {
@@ -101,6 +180,15 @@ struct WorksheetListView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .swipeActions {
+                    Button {
+                        guard let uid = authService.uid else { return }
+                        Task { await store.duplicateSheet(sheet, teacherId: uid) }
+                    } label: {
+                        Label("Duplicate", systemImage: "doc.on.doc")
+                    }
+                    .tint(Color("GeoBlue"))
+                }
             }
             .onDelete { indexSet in
                 for index in indexSet {

@@ -103,6 +103,58 @@ final class WorksheetService {
         try await client.from("fieldwork_sheets").delete().eq("id", value: id).execute()
     }
 
+    /// Creates an independent copy of a sheet — new fieldwork_sheets row
+    /// (own id, always starts as draft/private regardless of the
+    /// original's status/visibility), plus a copy of every section and
+    /// question. Deliberately built on top of createSheet/addSection/
+    /// addQuestion rather than a bespoke bulk-insert, so duplication
+    /// always goes through the same validated write path as manual
+    /// authoring — if those methods' behavior ever changes, duplication
+    /// automatically stays consistent with it rather than silently
+    /// drifting out of sync.
+    ///
+    /// Sections/questions are copied in original order but their
+    /// section_order/question_order values are preserved as-is (not
+    /// recomputed), since addSection/addQuestion take an explicit order
+    /// parameter and the originals' order is already correct.
+    func duplicateSheet(_ original: FieldworkSheet, createdBy: String) async throws -> FieldworkSheet {
+        let newTitle = "\(original.title) (Copy)"
+        let newSheet = try await createSheet(
+            createdBy: createdBy,
+            title: newTitle,
+            description: original.description,
+            subjectArea: original.subjectArea,
+            yearLevel: original.yearLevel,
+            templateId: original.templateId,
+            excursionId: original.excursionId,
+            schoolId: original.schoolId
+        )
+
+        let sections = try await fetchSections(sheetId: original.id)
+        for section in sections {
+            let newSection = try await addSection(
+                sheetId: newSheet.id,
+                title: section.title,
+                instructions: section.instructions,
+                order: section.sectionOrder
+            )
+            let questions = try await fetchQuestions(sectionId: section.id)
+            for question in questions {
+                _ = try await addQuestion(
+                    sectionId: newSection.id,
+                    type: question.questionType,
+                    prompt: question.prompt,
+                    options: question.options,
+                    required: question.required,
+                    requiredTool: question.requiredTool,
+                    order: question.questionOrder
+                )
+            }
+        }
+
+        return newSheet
+    }
+
     // MARK: - Sections
 
     func fetchSections(sheetId: String) async throws -> [WorksheetSection] {
@@ -121,6 +173,31 @@ final class WorksheetService {
 
     func deleteSection(id: String) async throws {
         try await client.from("worksheet_sections").delete().eq("id", value: id).execute()
+    }
+
+    /// Persists a new section order after a drag-to-reorder. Takes the
+    /// full ordered list of section ids (post-drag) and writes each
+    /// one's new section_order in turn.
+    ///
+    /// This is N individual UPDATE calls rather than a single bulk
+    /// upsert: worksheet_sections' RLS policy checks ownership per row
+    /// via the parent fieldwork_sheets.owner_id, and a single multi-row
+    /// upsert would need every row to already exist with matching
+    /// unique keys for Supabase's upsert-by-conflict-target to target
+    /// section_order safely. Individual updates by id sidestep that
+    /// entirely and match the same per-row update style already used by
+    /// setSheetStatus/renameSheet above. A worksheet has at most a
+    /// handful of sections, so the extra round trips are not a real
+    /// performance concern.
+    func reorderSections(sheetId: String, orderedIds: [String]) async throws {
+        struct OrderPatch: Encodable { let section_order: Int }
+        for (index, id) in orderedIds.enumerated() {
+            try await client.from("worksheet_sections")
+                .update(OrderPatch(section_order: index))
+                .eq("id", value: id)
+                .eq("sheet_id", value: sheetId)
+                .execute()
+        }
     }
 
     // MARK: - Questions
@@ -148,13 +225,14 @@ final class WorksheetService {
     func addQuestion(sectionId: String,
                      type: WorksheetQuestionType,
                      prompt: String,
-                     options: WorksheetQuestionOptions = .init(),
+                     options: WorksheetQuestionOptions? = nil,
                      required: Bool = false,
                      requiredTool: String? = nil,
                      order: Int) async throws -> WorksheetQuestion {
+        let resolvedOptions = options ?? WorksheetQuestionOptions()
         let payload = QuestionInsert(
             section_id: sectionId, question_type: type.rawValue, prompt: prompt,
-            options: options, required: required, required_tool: requiredTool, question_order: order
+            options: resolvedOptions, required: required, required_tool: requiredTool, question_order: order
         )
         return try await client
             .from("worksheet_questions").insert(payload).select().single().execute().value
@@ -162,6 +240,19 @@ final class WorksheetService {
 
     func deleteQuestion(id: String) async throws {
         try await client.from("worksheet_questions").delete().eq("id", value: id).execute()
+    }
+
+    /// Persists a new question order within a section after a drag-to-
+    /// reorder, same per-row update approach as reorderSections above.
+    func reorderQuestions(sectionId: String, orderedIds: [String]) async throws {
+        struct OrderPatch: Encodable { let question_order: Int }
+        for (index, id) in orderedIds.enumerated() {
+            try await client.from("worksheet_questions")
+                .update(OrderPatch(question_order: index))
+                .eq("id", value: id)
+                .eq("section_id", value: sectionId)
+                .execute()
+        }
     }
 
     // MARK: - Excursions / templates (read helpers for the builder pickers)

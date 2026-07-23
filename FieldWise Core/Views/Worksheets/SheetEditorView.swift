@@ -3,8 +3,19 @@
 //  FieldWise Core
 //
 //  The worksheet builder itself: add sections, add questions of any of
-//  the ten types to a section, reorder is by creation order (drag-to-
-//  reorder is a follow-up), publish when ready.
+//  the ten types to a section, publish when ready.
+//
+//  Reordering (sections and questions) is handled by two dedicated
+//  screens -- SectionReorderView and QuestionReorderView -- rather than
+//  inline drag handles here. An earlier version put everything in one
+//  List with nested per-section ForEach+.onMove pairs; dragging a
+//  question across a section boundary crashed inside SwiftUI's own
+//  internals (EXC_BREAKPOINT before any of this app's code ran), because
+//  multiple independent reorderable ForEachs sharing one List isn't a
+//  safely supported configuration. Splitting reordering into its own
+//  single-list screens (one ForEach+.onMove each, nothing else sharing
+//  the List) removes that failure mode entirely. This view goes back to
+//  its original ScrollView+VStack+GeoCard display for everything else.
 //
 
 import SwiftUI
@@ -17,9 +28,68 @@ struct SheetEditorView: View {
     @State private var newSectionTitle = ""
     @State private var addQuestionSectionId: String?
     @State private var pushSessions = false
-
+    @State private var pushCurriculum = false
+    @State private var pushSectionReorder = false
+    @State private var reorderingQuestionsIn: WorksheetSection?
 
     var body: some View {
+        content
+            .background(Color("GeoSurface"))
+            .navigationTitle(sheet.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $pushSessions) {
+                SessionsView(sheet: sheet)
+            }
+            .navigationDestination(isPresented: $pushCurriculum) {
+                CurriculumPickerView(sheet: sheet)
+            }
+            .navigationDestination(isPresented: $pushSectionReorder) {
+                SectionReorderView(sheet: sheet, store: store)
+            }
+            .navigationDestination(item: $reorderingQuestionsIn) { section in
+                QuestionReorderView(section: section, store: store)
+            }
+            .toolbar { toolbarContent }
+            .task { await store.loadDetail(sheetId: sheet.id) }
+            .alert("Add section", isPresented: $showingAddSection) {
+                TextField("Section title (e.g. Site 1)", text: $newSectionTitle)
+                Button("Cancel", role: .cancel) { newSectionTitle = "" }
+                Button("Add") {
+                    let title = newSectionTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !title.isEmpty else { return }
+                    Task { await store.addSection(sheetId: sheet.id, title: title, instructions: nil) }
+                    newSectionTitle = ""
+                }
+            }
+            .sheet(item: Binding(
+                get: { addQuestionSectionId.map { SectionID(id: $0) } },
+                set: { addQuestionSectionId = $0?.id }
+            )) { wrapped in
+                AddQuestionView { type, prompt, options, required in
+                    Task {
+                        await store.addQuestion(
+                            sectionId: wrapped.id, type: type, prompt: prompt,
+                            options: options, required: required, requiredTool: nil)
+                        addQuestionSectionId = nil
+                    }
+                }
+            }
+            .alert("Something went wrong", isPresented: .constant(store.errorText != nil), actions: {
+                Button("OK") { store.errorText = nil }
+            }, message: {
+                Text(store.errorText ?? "")
+            })
+    }
+
+    /// The scrollable section list, split out from `body` so the
+    /// type-checker isn't asked to solve one giant expression combining
+    /// this with four .navigationDestination modifiers and a full
+    /// toolbar closure at once. That combination previously produced
+    /// "The compiler is unable to type-check this expression in
+    /// reasonable time" -- a real compile-time performance ceiling, not
+    /// a logic error. Breaking body into smaller, explicitly-typed
+    /// pieces is the standard fix.
+    private var content: some View {
         ScrollView {
             VStack(spacing: 16) {
                 header
@@ -32,6 +102,7 @@ struct SheetEditorView: View {
                             section: section,
                             questions: store.questionsBySection[section.id] ?? [],
                             onAddQuestion: { addQuestionSectionId = section.id },
+                            onReorderQuestions: { reorderingQuestionsIn = section },
                             onDeleteQuestion: { q in Task { await store.deleteQuestion(q) } },
                             onDeleteSection: { Task { await store.deleteSection(section) } }
                         )
@@ -42,67 +113,45 @@ struct SheetEditorView: View {
             }
             .padding(20)
         }
-        .background(Color("GeoSurface"))
-        .navigationTitle(sheet.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(isPresented: $pushSessions) {
-            SessionsView(sheet: sheet)
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        Task { await store.setStatus(sheet, status: "active") }
-                    } label: {
-                        Label("Publish", systemImage: "checkmark.seal.fill")
-                    }
-                    Button {
-                        Task { await store.setStatus(sheet, status: "draft") }
-                    } label: {
-                        Label("Move to draft", systemImage: "pencil.circle")
-                    }
-                    Divider()
-                    Button {
-                        pushSessions = true
-                    } label: {
-                        Label("Sessions", systemImage: "qrcode")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-                .tint(Color("BrandGreen"))
-            }
-        }
+    }
 
-        .task { await store.loadDetail(sheetId: sheet.id) }
-        .alert("Add section", isPresented: $showingAddSection) {
-            TextField("Section title (e.g. Site 1)", text: $newSectionTitle)
-            Button("Cancel", role: .cancel) { newSectionTitle = "" }
-            Button("Add") {
-                let title = newSectionTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !title.isEmpty else { return }
-                Task { await store.addSection(sheetId: sheet.id, title: title, instructions: nil) }
-                newSectionTitle = ""
-            }
-        }
-        .sheet(item: Binding(
-            get: { addQuestionSectionId.map { SectionID(id: $0) } },
-            set: { addQuestionSectionId = $0?.id }
-        )) { wrapped in
-            AddQuestionView { type, prompt, options, required in
-                Task {
-                    await store.addQuestion(
-                        sectionId: wrapped.id, type: type, prompt: prompt,
-                        options: options, required: required, requiredTool: nil)
-                    addQuestionSectionId = nil
+    /// Toolbar content, split out for the same reason as `content` above.
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Menu {
+                Button {
+                    Task { await store.setStatus(sheet, status: "active") }
+                } label: {
+                    Label("Publish", systemImage: "checkmark.seal.fill")
                 }
+                Button {
+                    Task { await store.setStatus(sheet, status: "draft") }
+                } label: {
+                    Label("Move to draft", systemImage: "pencil.circle")
+                }
+                Divider()
+                Button {
+                    pushSectionReorder = true
+                } label: {
+                    Label("Reorder sections", systemImage: "arrow.up.arrow.down")
+                }
+                Divider()
+                Button {
+                    pushSessions = true
+                } label: {
+                    Label("Sessions", systemImage: "qrcode")
+                }
+                Button {
+                    pushCurriculum = true
+                } label: {
+                    Label("Curriculum", systemImage: "map")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
             }
+            .tint(Color("BrandGreen"))
         }
-        .alert("Something went wrong", isPresented: .constant(store.errorText != nil), actions: {
-            Button("OK") { store.errorText = nil }
-        }, message: {
-            Text(store.errorText ?? "")
-        })
     }
 
     private var header: some View {
@@ -160,6 +209,7 @@ private struct SectionCard: View {
     let section: WorksheetSection
     let questions: [WorksheetQuestion]
     let onAddQuestion: () -> Void
+    let onReorderQuestions: () -> Void
     let onDeleteQuestion: (WorksheetQuestion) -> Void
     let onDeleteSection: () -> Void
 
@@ -170,6 +220,11 @@ private struct SectionCard: View {
                     Text(section.title).font(.system(size: 16, weight: .semibold))
                     Spacer()
                     Menu {
+                        if questions.count > 1 {
+                            Button(action: onReorderQuestions) {
+                                Label("Reorder questions", systemImage: "arrow.up.arrow.down")
+                            }
+                        }
                         Button(role: .destructive, action: onDeleteSection) {
                             Label("Delete section", systemImage: "trash")
                         }

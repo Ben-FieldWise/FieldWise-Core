@@ -232,8 +232,8 @@ private struct TeacherHome: View {
                 .init(title: "Sessions", icon: "qrcode", color: Color("GeoBlue")) { onSessions() },
                 .init(title: "Review work", icon: "checklist", color: Color("BrandGreen")) { navCoordinatorGoTo(.classes) },
                 .init(title: "Plan excursion", icon: "map.circle.fill", color: Color("GeoBlue")) { navCoordinatorGoTo(.excursions) },
-                .init(title: "Sites & map", icon: "mappin.and.ellipse", color: Color("GeoCoral")) { navCoordinatorGoTo(.map) },
-                .init(title: "Reports", icon: "doc.plaintext.fill", color: Color("BrandAmber")) { navCoordinatorGoTo(.reports) }
+                .init(title: "Sites & map", icon: "mappin.and.ellipse", color: Color("GeoCoral")) { navCoordinatorGoTo(.more) },
+                .init(title: "Reports", icon: "doc.plaintext.fill", color: Color("BrandAmber")) { navCoordinatorGoTo(.more) }
             ])
         }
     }
@@ -324,8 +324,8 @@ private struct StudentHome: View {
                 .init(title: "Join worksheet", icon: "qrcode", color: Color("GeoGreenDark")) { onJoinWorksheet() },
                 .init(title: "My worksheets", icon: "checkmark.circle", color: Color("GeoBlue")) { onMyWorksheets() },
                 .init(title: "Excursion", icon: "map.circle.fill", color: Color("GeoBlue")) { nav.selectedTab = .excursions },
-                .init(title: "Map", icon: "mappin.and.ellipse", color: Color("GeoCoral")) { nav.selectedTab = .map },
-                .init(title: "Reports", icon: "doc.plaintext.fill", color: Color("BrandAmber")) { nav.selectedTab = .reports }
+                .init(title: "Maps & sites", icon: "mappin.and.ellipse", color: Color("GeoCoral")) { nav.selectedTab = .more },
+                .init(title: "Reports & portfolios", icon: "doc.plaintext.fill", color: Color("BrandAmber")) { nav.selectedTab = .more }
             ])
         }
     }
